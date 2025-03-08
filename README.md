@@ -1,6 +1,6 @@
-# release-toolkit
+# xrelease
 
-Getting tired of reinventing the release wheel for each project/language? Release-toolkit provides a standardized way to manage your release process across any project.
+Getting tired of reinventing the release wheel for each project/language? xrelease provides a standardized way to manage your release process across any project.
 
 ## Quickstart Guide
 
@@ -11,15 +11,15 @@ Choose one of the following installation methods:
 #### Option A: From npm registry (recommended)
 
 ```bash
-npm install -g @release-toolkit/cli
+npm install -g xrelease
 ```
 
 #### Option B: From GitHub
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/release-toolkit.git
-cd release-toolkit
+git clone https://github.com/yourusername/xrelease.git
+cd xrelease
 
 # Install dependencies
 npm install
@@ -34,15 +34,15 @@ chmod +x dist/cli/index.js
 npm link
 
 # Verify installation
-release-toolkit --help
+xrelease --help
 ```
 
 #### Option C: As a local project dependency
 
 ```bash
 # Clone and build first
-git clone https://github.com/yourusername/release-toolkit.git
-cd release-toolkit
+git clone https://github.com/yourusername/xrelease.git
+cd xrelease
 npm install
 npm run build
 chmod +x dist/cli/index.js
@@ -50,7 +50,7 @@ chmod +x dist/cli/index.js
 # Then in your project's package.json
 {
   "devDependencies": {
-    "release-toolkit": "file:../path/to/release-toolkit"
+    "xrelease": "file:../path/to/xrelease"
   }
 }
 
@@ -66,13 +66,13 @@ npm install
 cd your-project
 ```
 
-2. Initialize release-toolkit:
+2. Initialize xrelease:
 
 ```bash
-release-toolkit init
+xrelease init
 ```
 
-This will create a `.release-toolkit.yml` configuration file in your project root.
+This will create a `.xrelease.yml` configuration file in your project root.
 
 3. Set up conventional commits (optional but recommended):
 
@@ -119,7 +119,7 @@ docs(readme): update installation instructions
 
 ### 3. Configuration
 
-Edit `.release-toolkit.yml` to match your project needs:
+Edit `.xrelease.yml` to match your project needs:
 
 ```yaml
 version: 1
@@ -152,7 +152,7 @@ release:
 To create a new release:
 
 ```bash
-release-toolkit create
+xrelease create
 ```
 
 This will:
@@ -167,16 +167,16 @@ This will:
 
 ```bash
 # View current version
-release-toolkit version
+xrelease version
 
 # Preview next release
-release-toolkit preview
+xrelease preview
 
 # Create release with specific bump
-release-toolkit create --bump minor
+xrelease create --bump minor
 
 # View release history
-release-toolkit history
+xrelease history
 ```
 
 ### 6. CI/CD Integration
@@ -187,8 +187,8 @@ Add to your CI pipeline:
 steps:
   - name: Create Release
     run: |
-      npm install -g @release-toolkit/cli
-      release-toolkit create --ci
+      npm install -g xrelease
+      xrelease create --ci
 ```
 
 ## Features

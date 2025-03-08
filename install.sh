@@ -6,7 +6,7 @@ GREEN='\033[0;32m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-echo -e "${BLUE}🚀 Installing release-toolkit...${NC}"
+echo -e "${BLUE}🚀 Installing xrelease...${NC}"
 
 # Check if npm is installed
 if ! command -v npm &> /dev/null; then
@@ -14,16 +14,16 @@ if ! command -v npm &> /dev/null; then
     exit 1
 fi
 
-# Install release-toolkit globally
-echo -e "${BLUE}Installing release-toolkit globally...${NC}"
-npm install -g release-toolkit
+# Install xrelease globally
+echo -e "${BLUE}Installing xrelease globally...${NC}"
+npm install -g xrelease
 
 # Check if installation was successful
 if [ $? -eq 0 ]; then
-    echo -e "${GREEN}✓ release-toolkit installed successfully!${NC}"
-    echo -e "\nTo initialize release-toolkit in your project, run:"
-    echo -e "${BLUE}release-toolkit init${NC}"
+    echo -e "${GREEN}✓ xrelease installed successfully!${NC}"
+    echo -e "\nTo initialize xrelease in your project, run:"
+    echo -e "${BLUE}xrelease init${NC}"
 else
-    echo -e "${RED}Error: Failed to install release-toolkit${NC}"
+    echo -e "${RED}Error: Failed to install xrelease${NC}"
     exit 1
 fi 

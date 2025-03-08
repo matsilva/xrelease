@@ -6,10 +6,7 @@ import { addCommand } from './commands/add.js';
 
 const program = new Command();
 
-program
-  .name('release-toolkit')
-  .description('A reusable release infrastructure toolkit for Node.js projects')
-  .version('0.1.0');
+program.name('xrelease').description('A reusable release infrastructure toolkit for Node.js projects').version('0.1.0');
 
 // Initialize command
 program
@@ -32,4 +29,4 @@ program.on('command:*', () => {
   process.exit(1);
 });
 
-program.parse(); 
+program.parse();
