@@ -53,17 +53,28 @@ describe('initCommand', () => {
       workflow: true,
       changelog: true,
       hooks: true,
+      language: 'node', // Default language
     });
   });
 
   it('should prompt for component selection when --yes flag is not provided', async () => {
     vi.mocked(inquirer.prompt).mockResolvedValue({
+      language: 'go',
       components: ['workflow', 'changelog'],
     });
 
     await initCommand({ yes: false });
 
     expect(inquirer.prompt).toHaveBeenCalledWith([
+      expect.objectContaining({
+        type: 'list',
+        name: 'language',
+        message: 'Select your project language:',
+        choices: [
+          { name: 'Node.js', value: 'node' },
+          { name: 'Go', value: 'go' },
+        ],
+      }),
       expect.objectContaining({
         type: 'checkbox',
         name: 'components',
@@ -80,11 +91,13 @@ describe('initCommand', () => {
       workflow: true,
       changelog: true,
       hooks: false,
+      language: 'go',
     });
   });
 
   it('should setup Git hooks when selected', async () => {
     vi.mocked(inquirer.prompt).mockResolvedValue({
+      language: 'node',
       components: ['hooks'],
     });
 
@@ -126,5 +139,17 @@ describe('initCommand', () => {
     expect(mockSpinner.fail).toHaveBeenCalledWith('Initialization failed');
     expect(consoleSpy).toHaveBeenCalledWith('\nError: Unknown error occurred');
     expect(processSpy).toHaveBeenCalledWith(1);
+  });
+
+  it('should respect language option when provided via CLI', async () => {
+    await initCommand({ yes: true, language: 'go' });
+
+    expect(inquirer.prompt).not.toHaveBeenCalled();
+    expect(setupTemplates).toHaveBeenCalledWith({
+      workflow: true,
+      changelog: true,
+      hooks: true,
+      language: 'go',
+    });
   });
 });

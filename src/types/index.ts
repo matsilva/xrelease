@@ -1,6 +1,7 @@
 // CLI Options
 export interface InitOptions {
   yes?: boolean;
+  language?: string;
 }
 
 // Component Configuration
@@ -8,6 +9,7 @@ export interface ComponentConfig {
   workflow: boolean;
   changelog: boolean;
   hooks: boolean;
+  language?: string;
 }
 
 // Git Hook Configuration
@@ -53,4 +55,4 @@ export interface TemplateOptions {
   projectName?: string;
   owner?: string;
   registry?: string;
-} 
+}

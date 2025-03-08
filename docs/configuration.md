@@ -1,5 +1,19 @@
 # Configuration Guide
 
+## Version Management
+
+xrelease uses `package.json` as the single source of truth for versioning in ALL projects. A minimal version file looks like:
+
+```json
+{
+  "name": "your-project",
+  "version": "1.0.0",
+  "private": true
+}
+```
+
+This file is automatically created by `xrelease init` and is used regardless of your project's language.
+
 ## Quickstart Config
 
 Copy this into `.xrelease.yml` to get started:
@@ -54,6 +68,15 @@ release:
 - Default: `patch`
 - Purpose: Default version increment type
 
+### release.version
+
+- Type: `object`
+- Required: no
+- Properties:
+  - `files`: Array of files to update with new version
+  - Example: Update go.mod when version changes
+- Purpose: Configure version synchronization
+
 ### release.changelog
 
 - Type: `object`
@@ -94,6 +117,11 @@ version: 1
 release:
   branch: main
   defaultBump: patch
+  version:
+    files:
+      - path: 'pyproject.toml'
+        pattern: "version\\s*=\\s*\"(?<version>[^\"]+)\""
+        template: 'version = "${version}"'
   checks:
     - type: lint
       command: 'poetry run flake8'
@@ -115,6 +143,11 @@ version: 1
 release:
   branch: main
   defaultBump: minor # Scala often uses minor for features
+  version:
+    files:
+      - path: 'build.sbt'
+        pattern: "version\\s*:=\\s*\"(?<version>[^\"]+)\""
+        template: 'version := "${version}"'
   checks:
     - type: lint
       command: 'sbt scalafmtCheckAll'
@@ -136,6 +169,11 @@ version: 1
 release:
   branch: main
   defaultBump: patch
+  version:
+    files:
+      - path: 'go.mod'
+        pattern: "module\\s+(?<module>[^\\s]+)\\s+(?<version>v\\d+)"
+        template: 'module ${module} ${version}'
   checks:
     - type: lint
       command: 'golangci-lint run'
@@ -146,6 +184,12 @@ release:
   actions:
     - type: git-tag
     - type: github-release
+    - type: custom
+      name: 'update-go-mod'
+      command: |
+        VERSION=$(node -p "require('./package.json').version")
+        go mod edit -module "$(go list -m)"/v${VERSION%%.*}
+        go mod tidy
 ```
 
 ### Swift (SPM)
@@ -155,6 +199,11 @@ version: 1
 release:
   branch: main
   defaultBump: minor
+  version:
+    files:
+      - path: 'Package.swift'
+        pattern: "version:\\s*\"(?<version>[^\"]+)\""
+        template: 'version: "${version}"'
   checks:
     - type: lint
       command: 'swiftlint'
@@ -176,6 +225,11 @@ version: 1
 release:
   branch: main
   defaultBump: patch
+  version:
+    files:
+      - path: 'Cargo.toml'
+        pattern: "version\\s*=\\s*\"(?<version>[^\"]+)\""
+        template: 'version = "${version}"'
   checks:
     - type: lint
       command: 'cargo clippy'

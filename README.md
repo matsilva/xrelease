@@ -39,6 +39,15 @@ xrelease create -p     # Patch release
 
 Yes, it's built with Node.js, not "sleek, performant Scala with higher-order functions" 😉. But like `sbt` or `mill`, it's just a build tool - it won't touch your production code. Promise!... maybe
 
+## The Opinionated Bit
+
+xrelease uses `package.json` as the single source of truth for versioning in ALL projects, regardless of language. Why?
+
+- 🎯 One consistent way to handle version
+- 🔄 Proven, battle-tested version bumping
+- 🛠 Works with existing tools and CI systems
+- 📦 Minimal config (just version, marked as private)
+
 ## License
 
 MIT

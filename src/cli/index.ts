@@ -14,9 +14,12 @@ program
 // Initialize command
 program
   .command('init')
-  .description('Initialize release toolkit in your project')
+  .description('Initialize release toolkit')
   .option('-y, --yes', 'Skip prompts and use defaults')
-  .action(initCommand);
+  .option('-l, --language <type>', 'Project language (node, go)', 'node')
+  .action((options) => {
+    initCommand(options);
+  });
 
 // Add command
 program
