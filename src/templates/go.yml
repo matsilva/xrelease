@@ -1,0 +1,39 @@
+version: 1
+release:
+  # Branch configuration
+  branch: main
+
+  # Version bump type
+  defaultBump: patch
+
+  # Version file updates
+  version:
+    files:
+      - path: 'go.mod'
+        pattern: "module\\s+(?<module>[^\\s]+)\\s+(?<version>v\\d+)"
+        template: 'module ${module} ${version}'
+
+  # Changelog configuration
+  changelog:
+    enabled: true
+    template: conventional
+
+  # Pre-release checks
+  checks:
+    - type: lint
+      command: 'golangci-lint run'
+    - type: test
+      command: 'go test ./...'
+    - type: build
+      command: 'go build'
+
+  # Post-release actions
+  actions:
+    - type: git-tag
+    - type: github-release
+    - type: custom
+      name: 'update-go-mod'
+      command: |
+        VERSION=$(node -p "require('./package.json').version")
+        go mod edit -module "$(go list -m)"/v${VERSION%%.*}
+        go mod tidy

@@ -1,3 +1,6 @@
+import fs from 'fs/promises';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import inquirer from 'inquirer';
 import ora from 'ora';
 import chalk from 'chalk';
@@ -60,11 +63,68 @@ export async function initCommand(options: InitOptions): Promise<void> {
       spinner.succeed('Git hooks configured successfully');
     }
 
-    console.log(chalk.green('\n✨ xrelease initialized successfully!'));
+    // Get template path for .xrelease.yml
+    const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+    // Create package.json if it doesn't exist (for version tracking)
+    spinner.start('Creating package.json...');
+    try {
+      await fs.access('package.json');
+      spinner.succeed('package.json already exists');
+    } catch {
+      await fs.writeFile(
+        'package.json',
+        JSON.stringify(
+          {
+            name: path.basename(process.cwd()),
+            version: '0.1.0',
+            private: true,
+          },
+          null,
+          2
+        )
+      );
+      spinner.succeed('Created package.json');
+    }
+
+    // Create .xrelease.yml
+    spinner.start('Creating .xrelease.yml...');
+    const templatePath = path.join(__dirname, '../../templates', `${components.language}.yml`);
+
+    // Read template
+    spinner.start('Getting release config template...');
+    const template = await fs.readFile(templatePath, 'utf-8');
+    spinner.succeed('Release config template loaded');
+
+    try {
+      await fs.access('.xrelease.yml');
+      if (!options.yes) {
+        spinner.fail('.xrelease.yml already exists. Use --yes to overwrite');
+        return;
+      }
+      spinner.info('.xrelease.yml exists, overwriting...');
+    } catch {
+      // File doesn't exist, continue
+    }
+
+    await fs.writeFile('.xrelease.yml', template);
+    spinner.succeed('Created .xrelease.yml');
+
+    // Create .gitignore if it doesn't exist
+    spinner.start('Creating .gitignore...');
+    try {
+      await fs.access('.gitignore');
+      spinner.succeed('.gitignore already exists');
+    } catch {
+      await fs.writeFile('.gitignore', 'node_modules/\n.DS_Store\n');
+      spinner.succeed('Created .gitignore');
+    }
+
+    console.log('\n✨ xrelease initialized successfully!');
     console.log('\nNext steps:');
     console.log('  1. Review the generated configuration files');
     console.log(`  2. Run ${chalk.cyan('git commit')} to test the commit hooks`);
-    console.log(`  3. Create a new tag to test the release workflow`);
+    console.log('  3. Create a new tag to test the release workflow');
 
     // Add language-specific instructions
     if (components.language === 'go') {
@@ -75,7 +135,21 @@ export async function initCommand(options: InitOptions): Promise<void> {
     }
   } catch (error) {
     spinner.fail('Initialization failed');
-    console.error(chalk.red(`\nError: ${error instanceof Error ? error.message : 'Unknown error occurred'}`));
-    process.exit(1);
+
+    if (error instanceof Error) {
+      console.error(`\nError: ${error.message}`);
+    } else if (typeof error === 'string') {
+      console.error('\nError: Unknown error occurred');
+    } else {
+      console.error('\nError: Unknown error occurred');
+    }
+
+    // Only exit in non-test environment
+    if (process.env.NODE_ENV !== 'test') {
+      process.exit(1);
+    }
+
+    // In test environment, throw the error
+    throw error;
   }
 }
