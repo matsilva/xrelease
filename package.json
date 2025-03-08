@@ -4,7 +4,7 @@
     "description": "A reusable release infrastructure toolkit for Node.js projects",
     "main": "dist/index.js",
     "bin": {
-        "release-toolkit": "./dist/cli.js"
+        "release-toolkit": "./dist/cli/index.js"
     },
     "type": "module",
     "scripts": {

@@ -27,24 +27,34 @@ npm install
 # Build the project
 npm run build
 
+# Make the CLI executable
+chmod +x dist/cli/index.js
+
 # Create a global symlink
 npm link
 
-# Or use directly with npx
-npx /path/to/release-toolkit/cli.js
+# Verify installation
+release-toolkit --help
 ```
 
 #### Option C: As a local project dependency
 
 ```bash
-# Add as a local dependency in your project's package.json
+# Clone and build first
+git clone https://github.com/yourusername/release-toolkit.git
+cd release-toolkit
+npm install
+npm run build
+chmod +x dist/cli/index.js
+
+# Then in your project's package.json
 {
   "devDependencies": {
     "release-toolkit": "file:../path/to/release-toolkit"
   }
 }
 
-# Then install
+# Install in your project
 npm install
 ```
 
