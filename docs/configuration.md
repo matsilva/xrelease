@@ -1,8 +1,8 @@
 # Configuration Guide
 
-## Configuration File
+## Quickstart Config
 
-The `.xrelease.yml` configuration file supports the following options:
+Copy this into `.xrelease.yml` to get started:
 
 ```yaml
 version: 1
@@ -30,47 +30,162 @@ release:
     - type: github-release
 ```
 
-## Conventional Commits Setup
+## Parameter Reference
 
-For consistent versioning, we recommend using conventional commits:
+### version
 
-```bash
-# Install necessary dependencies
-npm install --save-dev @commitlint/cli @commitlint/config-conventional husky
+- Type: `number`
+- Required: yes
+- Default: `1`
+- Purpose: Config file version
 
-# Initialize husky
-npx husky install
+### release.branch
 
-# Add commit-msg hook for commitlint
-npx husky add .husky/commit-msg 'npx --no -- commitlint --edit "$1"'
+- Type: `string`
+- Required: yes
+- Default: `main`
+- Purpose: Branch to create releases from
 
-# Create commitlint config file
-echo "module.exports = {extends: ['@commitlint/config-conventional']}" > commitlint.config.js
+### release.defaultBump
+
+- Type: `string`
+- Required: no
+- Options: `major` | `minor` | `patch`
+- Default: `patch`
+- Purpose: Default version increment type
+
+### release.changelog
+
+- Type: `object`
+- Required: no
+- Properties:
+  - `enabled`: `boolean` - Generate changelog
+  - `template`: `string` - Changelog format (`conventional` | `simple`)
+- Purpose: Controls changelog generation
+
+### release.checks
+
+- Type: `array`
+- Required: no
+- Items: Pre-release validation steps
+- Available checks:
+  - `lint`: Run code linter
+  - `test`: Run test suite
+  - `build`: Verify build
+  - Custom: `{ type: string, command: string }`
+- Purpose: Validates release readiness
+
+### release.actions
+
+- Type: `array`
+- Required: no
+- Available actions:
+  - `git-tag`: Create and push git tag
+  - `github-release`: Create GitHub release
+  - Custom: `{ type: string, command: string }`
+- Purpose: Actions to perform on release
+
+## Language Examples
+
+### Python (Poetry)
+
+```yaml
+version: 1
+release:
+  branch: main
+  defaultBump: patch
+  checks:
+    - type: lint
+      command: 'poetry run flake8'
+    - type: test
+      command: 'poetry run pytest'
+    - type: build
+      command: 'poetry build'
+  actions:
+    - type: git-tag
+    - type: github-release
+    - type: custom
+      command: 'poetry publish'
 ```
 
-### Commit Message Format
+### Scala (sbt)
 
+```yaml
+version: 1
+release:
+  branch: main
+  defaultBump: minor # Scala often uses minor for features
+  checks:
+    - type: lint
+      command: 'sbt scalafmtCheckAll'
+    - type: test
+      command: 'sbt test'
+    - type: build
+      command: 'sbt package'
+  actions:
+    - type: git-tag
+    - type: github-release
+    - type: custom
+      command: 'sbt publish'
 ```
-type(scope): subject
 
-[optional body]
-[optional footer(s)]
+### Go
+
+```yaml
+version: 1
+release:
+  branch: main
+  defaultBump: patch
+  checks:
+    - type: lint
+      command: 'golangci-lint run'
+    - type: test
+      command: 'go test ./...'
+    - type: build
+      command: 'go build'
+  actions:
+    - type: git-tag
+    - type: github-release
 ```
 
-Valid types:
+### Swift (SPM)
 
-- feat: A new feature
-- fix: A bug fix
-- docs: Documentation changes
-- style: Code style changes
-- refactor: Code refactoring
-- test: Adding/modifying tests
-- chore: Maintenance tasks
-
-Example messages:
-
+```yaml
+version: 1
+release:
+  branch: main
+  defaultBump: minor
+  checks:
+    - type: lint
+      command: 'swiftlint'
+    - type: test
+      command: 'swift test'
+    - type: build
+      command: 'swift build'
+  actions:
+    - type: git-tag
+    - type: github-release
+    - type: custom
+      command: 'pod trunk push' # If using CocoaPods
 ```
-feat(auth): add OAuth2 support
-fix(api): handle null response
-docs(readme): update instructions
+
+### Rust (Cargo)
+
+```yaml
+version: 1
+release:
+  branch: main
+  defaultBump: patch
+  checks:
+    - type: lint
+      command: 'cargo clippy'
+    - type: test
+      command: 'cargo test'
+    - type: build
+      command: 'cargo build --release'
+  actions:
+    - type: git-tag
+    - type: github-release
+    - type: custom
+      command: 'cargo publish'
 ```
