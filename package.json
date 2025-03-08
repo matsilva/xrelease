@@ -1,7 +1,7 @@
 {
     "name": "xrelease",
     "version": "0.1.0",
-    "description": "A reusable release infrastructure toolkit for Node.js projects",
+    "description": "xrelease (pronounced cross-release) helps you setup automated releases for your project for any language",
     "main": "dist/index.js",
     "bin": {
         "xrelease": "./dist/cli/index.js"
@@ -18,12 +18,20 @@
     },
     "keywords": [
         "release",
-        "toolkit",
+        "cross-language",
+        "polyglot",
+        "release-automation",
         "ci",
         "cd",
         "automation",
         "versioning",
-        "changelog"
+        "changelog",
+        "python",
+        "golang",
+        "scala",
+        "nodejs",
+        "swift",
+        "release-management"
     ],
     "author": "Anand Kamat",
     "license": "MIT",

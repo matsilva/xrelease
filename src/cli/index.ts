@@ -6,7 +6,10 @@ import { addCommand } from './commands/add.js';
 
 const program = new Command();
 
-program.name('xrelease').description('A reusable release infrastructure toolkit for Node.js projects').version('0.1.0');
+program
+  .name('xrelease')
+  .description('xrelease (pronounced cross-release) helps you setup automated releases for your project for any language')
+  .version('0.1.0');
 
 // Initialize command
 program

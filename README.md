@@ -1,6 +1,14 @@
 # xrelease
 
-Getting tired of reinventing the release wheel for each project/language? xrelease provides a standardized way to manage your release process across any project.
+xrelease (pronounced cross-release) helps you setup automated releases for your project for any language. No matter what programming language or framework you use, xrelease provides a standardized way to manage your release process.
+
+## Why xrelease?
+
+- 🌍 **Language Agnostic**: Works with any programming language or framework
+- 🤖 **Automated Workflow**: Standardized release process that just works
+- 🔄 **Consistent Experience**: Same release workflow across all your projects
+- 📦 **Zero Config**: Sensible defaults with optional customization
+- 🔌 **Extensible**: Adapt to your project's specific needs
 
 ## Quickstart Guide
 
@@ -199,6 +207,14 @@ steps:
 - 🔄 CI/CD integration
 - 🎯 Configurable workflows
 - 🔌 Plugin system for custom actions
+
+## Origin Story
+
+As someone who builds in Python, Golang, Scala, Node.js, Swift, and more, I got tired of each ecosystem's quirky way of handling releases. Python has its poetry/twine dance, Scala has sbt-release (when it works), Node.js has semantic-release, and don't get me started on manually updating Swift package manifests. I just wanted one consistent way to handle this across all my projects - so I built xrelease to scratch my own itch.
+
+## A Note for Scala Developers
+
+Yes, xrelease is built with Node.js, not "sleek, performant, low-overhead Scala code with higher-order functions that will run on anything. Period. End of sentence." 😉 But here's the thing: release automation is fundamentally about file manipulation, git operations, and API calls. Node.js is perfect for this kind of task, and the CLI tool has zero impact on your production code or runtime performance. Think of it like using `sbt` or `mill` - these are build tools that happens to be written in Scala, but you use it for Java projects too, right?
 
 ## License
 
