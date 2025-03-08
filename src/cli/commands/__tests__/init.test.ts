@@ -112,7 +112,8 @@ describe('initCommand', () => {
 
     await initCommand({ yes: true });
 
-    expect(consoleSpy).toHaveBeenCalledWith('\n✨ Release toolkit initialized successfully!');
+    expect(consoleSpy).toHaveBeenCalledWith('\n✨ xrelease initialized successfully!');
+
     expect(consoleSpy).toHaveBeenCalledWith('\nNext steps:');
   });
 

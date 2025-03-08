@@ -3,6 +3,7 @@ import { Command } from 'commander';
 import chalk from 'chalk';
 import { initCommand } from './commands/init.js';
 import { addCommand } from './commands/add.js';
+import { createCommand } from './commands/create.js';
 
 const program = new Command();
 
@@ -14,7 +15,7 @@ program
 // Initialize command
 program
   .command('init')
-  .description('Initialize release toolkit')
+  .description('Initialize xrelease')
   .option('-y, --yes', 'Skip prompts and use defaults')
   .option('-l, --language <type>', 'Project language (node, go)', 'node')
   .action((options) => {
@@ -27,6 +28,18 @@ program
   .description('Add individual components to your project')
   .argument('<component>', 'Component to add (workflow, changelog, hooks)')
   .action(addCommand);
+
+// Create command
+program
+  .command('create')
+  .description('Create a new release')
+  .option('--ci', 'Run in CI mode (non-interactive)')
+  .option('--bump <type>', 'Version bump type (patch, minor, major)', 'patch')
+  .option('--branch <name>', 'Override the release branch (default: from config)')
+  .option('-c, --config <path>', 'Path to config file (default: .xrelease.yml)')
+  .action((options) => {
+    createCommand(options);
+  });
 
 // Error handling
 program.on('command:*', () => {

@@ -60,7 +60,7 @@ export async function initCommand(options: InitOptions): Promise<void> {
       spinner.succeed('Git hooks configured successfully');
     }
 
-    console.log(chalk.green('\n✨ Release toolkit initialized successfully!'));
+    console.log(chalk.green('\n✨ xrelease initialized successfully!'));
     console.log('\nNext steps:');
     console.log('  1. Review the generated configuration files');
     console.log(`  2. Run ${chalk.cyan('git commit')} to test the commit hooks`);
