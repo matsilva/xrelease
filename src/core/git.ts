@@ -8,10 +8,11 @@ const DEFAULT_HOOKS: GitHookConfig[] = [
     name: 'commit-msg',
     command: 'npx --no -- commitlint --edit $1',
   },
-  {
-    name: 'pre-commit',
-    command: 'npm run lint && npm test',
-  },
+  //TODO: allow users to configure pre-commit hook
+  // {
+  //   name: 'pre-commit',
+  //   command: 'npm run lint && npm test',
+  // },
 ];
 
 async function detectHuskyConfig(): Promise<boolean> {

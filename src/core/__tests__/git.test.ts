@@ -50,9 +50,6 @@ describe('setupGitHooks', () => {
     expect(fs.writeFile).toHaveBeenCalledWith('.husky/commit-msg', expect.stringContaining('npx --no -- commitlint --edit $1'), {
       mode: 0o755,
     });
-
-    // Check pre-commit hook
-    expect(fs.writeFile).toHaveBeenCalledWith('.husky/pre-commit', expect.stringContaining('npm run lint && npm test'), { mode: 0o755 });
   });
 
   it('should create commitlint config if it does not exist', async () => {
