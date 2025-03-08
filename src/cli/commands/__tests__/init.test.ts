@@ -9,7 +9,17 @@ import { setupTemplates } from '../../../core/template.js';
 // Mock dependencies
 vi.mock('inquirer');
 vi.mock('ora');
-vi.mock('chalk');
+vi.mock('chalk', async () => {
+  const actual = await vi.importActual('chalk');
+  return {
+    ...actual,
+    default: {
+      green: (str: string) => str,
+      cyan: (str: string) => str,
+      red: (str: string) => str,
+    },
+  };
+});
 vi.mock('../../../core/git.js');
 vi.mock('../../../core/template.js');
 
@@ -24,10 +34,7 @@ describe('initCommand', () => {
     vi.resetAllMocks();
 
     // Setup default mock implementations
-    vi.mocked(ora).mockReturnValue(mockSpinner);
-    vi.mocked(chalk.green).mockImplementation((str) => str);
-    vi.mocked(chalk.cyan).mockImplementation((str) => str);
-    vi.mocked(chalk.red).mockImplementation((str) => str);
+    vi.mocked(ora).mockReturnValue(mockSpinner as any);
     vi.mocked(setupGitHooks).mockResolvedValue(undefined);
     vi.mocked(setupTemplates).mockResolvedValue(undefined);
   });
@@ -82,36 +89,36 @@ describe('initCommand', () => {
   });
 
   it('should show success message on completion', async () => {
-    const consoleSpy = vi.spyOn(console, 'log');
+    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
 
     await initCommand({ yes: true });
 
-    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Release toolkit initialized successfully'));
-    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Next steps:'));
+    expect(consoleSpy).toHaveBeenCalledWith('\n✨ Release toolkit initialized successfully!');
+    expect(consoleSpy).toHaveBeenCalledWith('\nNext steps:');
   });
 
   it('should handle errors and show error message', async () => {
     const error = new Error('Setup failed');
     vi.mocked(setupTemplates).mockRejectedValue(error);
-    const consoleSpy = vi.spyOn(console, 'error');
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     const processSpy = vi.spyOn(process, 'exit').mockImplementation(() => undefined as never);
 
     await initCommand({ yes: true });
 
     expect(mockSpinner.fail).toHaveBeenCalledWith('Initialization failed');
-    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Setup failed'));
+    expect(consoleSpy).toHaveBeenCalledWith('\nError: Setup failed');
     expect(processSpy).toHaveBeenCalledWith(1);
   });
 
   it('should handle non-Error objects in error handling', async () => {
     vi.mocked(setupTemplates).mockRejectedValue('String error');
-    const consoleSpy = vi.spyOn(console, 'error');
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     const processSpy = vi.spyOn(process, 'exit').mockImplementation(() => undefined as never);
 
     await initCommand({ yes: true });
 
     expect(mockSpinner.fail).toHaveBeenCalledWith('Initialization failed');
-    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Unknown error occurred'));
+    expect(consoleSpy).toHaveBeenCalledWith('\nError: Unknown error occurred');
     expect(processSpy).toHaveBeenCalledWith(1);
   });
 });
