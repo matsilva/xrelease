@@ -24,6 +24,7 @@ export interface Action {
   type: string;
   command?: string;
   name?: string;
+  assets?: string | string[];
 }
 
 export interface ReleaseConfig {
