@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { initCommand } from '../init.js';
 import inquirer from 'inquirer';
-import ora from 'ora';
+import ora, { Ora } from 'ora';
 import chalk from 'chalk';
 import { setupGitHooks } from '../../../core/git.js';
 import { setupTemplates } from '../../../core/template.js';
@@ -24,17 +24,23 @@ vi.mock('../../../core/git.js');
 vi.mock('../../../core/template.js');
 
 describe('initCommand', () => {
-  const mockSpinner = {
+  const mockSpinner: Partial<Ora> = {
     start: vi.fn().mockReturnThis(),
     succeed: vi.fn().mockReturnThis(),
     fail: vi.fn().mockReturnThis(),
+    stop: vi.fn().mockReturnThis(),
+    clear: vi.fn().mockReturnThis(),
+    render: vi.fn().mockReturnThis(),
+    frame: vi.fn().mockReturnThis(),
+    text: '',
+    isSpinning: false,
   };
 
   beforeEach(() => {
     vi.resetAllMocks();
 
     // Setup default mock implementations
-    vi.mocked(ora).mockReturnValue(mockSpinner as any);
+    vi.mocked(ora).mockReturnValue(mockSpinner as Ora);
     vi.mocked(setupGitHooks).mockResolvedValue(undefined);
     vi.mocked(setupTemplates).mockResolvedValue(undefined);
   });
