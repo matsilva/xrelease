@@ -55,11 +55,5 @@ jobs:
       - name: Create Release
         run: npx xrelease create --ci --bump ${{ inputs.version_bump }}
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      # At this point, the new version is tagged and released,
-      # and all changes are committed back to the repository
-      - name: Publish to NPM
-        run: npm publish
-        env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

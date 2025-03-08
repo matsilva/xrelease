@@ -9,9 +9,9 @@ release:
   # Version file updates
   version:
     files:
-      - path: 'go.mod'
-        pattern: "module\\s+(?<module>[^\\s]+)\\s+(?<version>v\\d+)"
-        template: 'module ${module} ${version}'
+      - path: 'package.json'
+        pattern: "\"version\":\\s*\"(?<version>[^\"]+)\""
+        template: '"version": "${version}"'
 
   # Changelog configuration
   changelog:
@@ -20,20 +20,13 @@ release:
 
   # Pre-release checks
   checks:
-    - type: lint
-      command: 'golangci-lint run'
-    - type: test
-      command: 'go test ./...'
     - type: build
-      command: 'go build'
+      command: 'npm run build'
 
   # Post-release actions
   actions:
     - type: git-tag
     - type: github-release
     - type: custom
-      name: 'update-go-mod'
-      command: |
-        VERSION=$(node -p "require('./package.json').version")
-        go mod edit -module "$(go list -m)"/v${VERSION%%.*}
-        go mod tidy
+      name: 'npm-publish'
+      command: 'npm publish'
