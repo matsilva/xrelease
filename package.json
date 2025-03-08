@@ -1,6 +1,6 @@
 {
   "name": "xrelease",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "xrelease (pronounced cross-release) helps you setup automated releases for your project for any language",
   "main": "dist/index.js",
   "bin": {
@@ -10,13 +10,13 @@
   "scripts": {
     "build": "tsc",
     "build:link": "npm run build && chmod +x dist/cli/index.js && npm link",
+    "build:relink": "npm unlink xrelease && npm run build:link",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "prepare": "husky install",
-    "release": "standard-version",
+    "prepare": "husky",
     "generate-changelog": "node scripts/generate-changelog.js"
   },
   "keywords": [
@@ -46,7 +46,6 @@
     "inquirer": "^9.2.15",
     "ora": "^8.0.1",
     "semver": "^7.7.1",
-    "standard-version": "^9.5.0",
     "yaml": "^2.4.0"
   },
   "devDependencies": {

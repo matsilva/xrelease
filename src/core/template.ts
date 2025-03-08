@@ -68,7 +68,6 @@ export async function setupTemplates(components: ComponentConfig): Promise<void>
         const pkg = JSON.parse(await fs.readFile(pkgPath, 'utf-8'));
         pkg.scripts = {
           ...pkg.scripts,
-          release: 'standard-version',
           'generate-changelog': 'node scripts/generate-changelog.js',
         };
         await fs.writeFile(pkgPath, JSON.stringify(pkg, null, 2));

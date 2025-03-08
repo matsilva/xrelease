@@ -58,7 +58,6 @@ describe('setupTemplates', () => {
         {
           scripts: {
             test: 'vitest',
-            release: 'standard-version',
             'generate-changelog': 'node scripts/generate-changelog.js',
           },
         },
