@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.1.4] - 2025-03-08
+
+* feat: add commit-push action to release workflow
+* feat: add commit and tag actions for release workflow
+
 ## [0.1.3] - 2025-03-08
 
 - chore: remove standard-version and update project scripts
