@@ -28,6 +28,9 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write # Required for creating releases and tags
+      pull-requests: write # Required if you want to create PRs
     steps:
       - uses: actions/checkout@v4
         with:
@@ -44,6 +47,14 @@ jobs:
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+
+      # Install dependencies
+      - name: Install dependencies
+        run: npm ci
+
+      # Build the project
+      - name: Build
+        run: npm run build
 
       # xrelease will:
       # 1. Update version in package.json
