@@ -10,6 +10,7 @@ import type { InitOptions } from '../../types/index.js';
 
 export async function initCommand(options: InitOptions): Promise<void> {
   const spinner = ora();
+  const configFile = options.configPath || (process.env.NODE_ENV === 'test' ? '.testxrelease.yml' : '.xrelease.yml');
 
   try {
     let components = {
@@ -88,25 +89,29 @@ export async function initCommand(options: InitOptions): Promise<void> {
       spinner.succeed('Created package.json');
     }
 
-    // Create .xrelease.yml
-    spinner.start('Creating .xrelease.yml...');
+    // Create config file
+    spinner.start(`Creating ${configFile}...`);
 
     // Read template
     const template = await fs.readFile(templatePath, 'utf-8');
 
     try {
-      await fs.access('.xrelease.yml');
+      await fs.access(configFile);
       if (!options.yes) {
-        spinner.fail('.xrelease.yml already exists. Use --yes to overwrite');
+        spinner.fail(`${configFile} already exists. Use --yes to overwrite`);
         return;
       }
-      spinner.info('.xrelease.yml exists, overwriting...');
+      spinner.info(`${configFile} exists, overwriting...`);
     } catch {
-      // File doesn't exist, continue
+      // Create directory if it doesn't exist
+      const configDir = path.dirname(configFile);
+      if (configDir !== '.') {
+        await fs.mkdir(configDir, { recursive: true });
+      }
     }
 
-    await fs.writeFile('.xrelease.yml', template);
-    spinner.succeed('Created .xrelease.yml');
+    await fs.writeFile(configFile, template);
+    spinner.succeed(`Created ${configFile}`);
 
     // Create .gitignore if it doesn't exist
     spinner.start('Creating .gitignore...');
