@@ -6,7 +6,7 @@ import { checkBranch } from '../../core/release/check-branch.js';
 import { runPreReleaseChecks } from '../../core/release/pre-release-checks.js';
 import { bumpVersion, type BumpType } from '../../core/release/bump-version.js';
 import { generateChangelog } from '../../core/release/generate-changelog.js';
-import { createAndPushTag } from '../../core/git.js';
+import { commitAndPush, createAndPushTag } from '../../core/git.js';
 import { execa } from 'execa';
 import { checkGitHubCLI, isGitHubCLIAuthenticated, createGitHubRelease } from '../../core/release/gh-cli.js';
 import { glob } from 'glob';
@@ -74,7 +74,7 @@ export async function createCommand(options: CreateOptions): Promise<void> {
       spinner.succeed('Changelog updated');
     }
 
-    // 6. Run post-release actions
+    // 6. Run Release actions actions
     if (config.release.actions?.length) {
       for (const action of config.release.actions) {
         const actionName = action.name || action.type;
@@ -83,6 +83,9 @@ export async function createCommand(options: CreateOptions): Promise<void> {
         switch (action.type) {
           case 'git-tag':
             await createAndPushTag(newVersion);
+            break;
+          case 'commit-push':
+            await commitAndPush(newVersion);
             break;
           case 'github-release':
             // Check if gh CLI is available

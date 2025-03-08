@@ -38,7 +38,7 @@ release:
     - type: test
     - type: build
 
-  # Post-release actions
+  # Release actions actions
   actions:
     - type: git-tag
     - type: github-release

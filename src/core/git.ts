@@ -129,3 +129,9 @@ export async function createAndPushTag(version: string): Promise<void> {
     throw new Error('Failed to create or push git tag');
   }
 }
+
+export async function commitAndPush(version: string): Promise<void> {
+  await execa('git', ['add', '.']);
+  await execa('git', ['commit', '-m', `chore: release v${version}`]);
+  await execa('git', ['push']);
+}

@@ -23,7 +23,8 @@ release:
     - type: build
       command: 'npm run build'
 
-  # Post-release actions
+  # Release actions actions
   actions:
     - type: git-tag
+    - type: commit-push
     - type: github-release

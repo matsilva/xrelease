@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { setupGitHooks, createAndPushTag } from '../git.js';
+import { setupGitHooks, createAndPushTag, commitAndPush } from '../git.js';
 import { execa } from 'execa';
 import fs from 'fs/promises';
 import path from 'path';
@@ -155,5 +155,27 @@ describe('createAndPushTag', () => {
       .mockRejectedValueOnce(new Error('Network error'));
 
     await expect(createAndPushTag('1.0.0')).rejects.toThrow('Network error');
+  });
+});
+
+describe('commitAndPush', () => {
+  beforeEach(() => {
+    vi.resetAllMocks();
+  });
+
+  it('should commit and push changes successfully', async () => {
+    vi.mocked(execa).mockResolvedValue({ stdout: '', stderr: '' } as any);
+
+    await expect(commitAndPush('1.0.0')).resolves.not.toThrow();
+
+    expect(execa).toHaveBeenCalledWith('git', ['add', '.']);
+    expect(execa).toHaveBeenCalledWith('git', ['commit', '-m', 'chore: release v1.0.0']);
+    expect(execa).toHaveBeenCalledWith('git', ['push']);
+  });
+
+  it('should throw error with message when commit fails', async () => {
+    vi.mocked(execa).mockRejectedValueOnce(new Error('Network error'));
+
+    await expect(commitAndPush('1.0.0')).rejects.toThrow('Network error');
   });
 });

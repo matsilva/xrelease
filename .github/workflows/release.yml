@@ -55,5 +55,4 @@ jobs:
       - name: Create Release
         run: npx xrelease create --ci --bump ${{ inputs.version_bump }}
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

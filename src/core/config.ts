@@ -42,7 +42,7 @@ export interface ReleaseConfig {
   // Pre-release checks
   checks?: Check[];
 
-  // Post-release actions
+  // Release actions actions
   actions?: Action[];
 }
 

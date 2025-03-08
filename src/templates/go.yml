@@ -27,9 +27,10 @@ release:
     - type: build
       command: 'go build'
 
-  # Post-release actions
+  # Release actions actions
   actions:
     - type: git-tag
+    - type: commit-push
     - type: github-release
     - type: custom
       name: 'update-go-mod'
