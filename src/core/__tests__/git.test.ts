@@ -40,31 +40,26 @@ describe('setupGitHooks', () => {
     await setupGitHooks();
 
     expect(fs.mkdir).toHaveBeenCalledWith('.husky', { recursive: true });
-    expect(execa).toHaveBeenCalledWith('npx', ['husky', 'install']);
+    expect(execa).toHaveBeenCalledWith('npx', ['husky', 'init']);
   });
 
   it('should create hook files with correct content and permissions', async () => {
     await setupGitHooks();
 
     // Check commit-msg hook
-    expect(fs.writeFile).toHaveBeenCalledWith('.husky/commit-msg', expect.stringContaining('npx --no -- commitlint --edit $1'), {
-      mode: 0o755,
-    });
+    expect(fs.writeFile).toHaveBeenCalledWith('.husky/commit-msg', 'npx --no -- commitlint --edit $1', { mode: 0o755 });
   });
 
   it('should create commitlint config if it does not exist', async () => {
     await setupGitHooks();
 
-    expect(fs.writeFile).toHaveBeenCalledWith(
-      '.commitlintrc.json',
-      JSON.stringify({ extends: ['@commitlint/config-conventional'] }, null, 2)
-    );
+    expect(fs.writeFile).toHaveBeenCalledWith('commitlint.config.js', "export default { extends: ['@commitlint/config-conventional'] };");
   });
 
   it('should skip creating commitlint config if it already exists', async () => {
     // Mock fs.access to indicate commitlint config exists
     vi.mocked(fs.access).mockImplementation((path) => {
-      if (path === '.commitlintrc.json') {
+      if (path === 'commitlint.config.js') {
         return Promise.resolve(undefined);
       }
       return Promise.reject(new Error('File not found'));
@@ -73,7 +68,7 @@ describe('setupGitHooks', () => {
     await setupGitHooks();
 
     // Should not write commitlint config
-    expect(fs.writeFile).not.toHaveBeenCalledWith('.commitlintrc.json', expect.any(String));
+    expect(fs.writeFile).not.toHaveBeenCalledWith('commitlint.config.js', expect.any(String));
   });
 
   it('should install commitlint dependencies', async () => {
@@ -96,7 +91,7 @@ describe('setupGitHooks', () => {
         return Promise.resolve(
           JSON.stringify({
             scripts: {
-              prepare: 'husky install',
+              prepare: 'npx husky init',
             },
           })
         );
@@ -107,7 +102,7 @@ describe('setupGitHooks', () => {
     await setupGitHooks();
 
     // Should not initialize husky again
-    expect(execa).not.toHaveBeenCalledWith('npx', ['husky', 'install']);
+    expect(execa).not.toHaveBeenCalledWith('npx', ['husky', 'init']);
   });
 
   it('should skip commitlint setup if already configured in package.json', async () => {
@@ -129,7 +124,7 @@ describe('setupGitHooks', () => {
     await setupGitHooks();
 
     // Should not create commitlint config or install dependencies
-    expect(fs.writeFile).not.toHaveBeenCalledWith('.commitlintrc.json', expect.any(String));
+    expect(fs.writeFile).not.toHaveBeenCalledWith('commitlint.config.js', expect.any(String));
     expect(execa).not.toHaveBeenCalledWith('npm', expect.arrayContaining(['@commitlint/cli']));
   });
 });

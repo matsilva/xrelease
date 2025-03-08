@@ -71,14 +71,14 @@ export async function setupGitHooks(): Promise<void> {
       await fs.mkdir('.husky', { recursive: true });
 
       // Initialize husky
-      await execa('npx', ['husky', 'install']);
+      await execa('npx', ['husky', 'init']);
 
       // Add husky prepare script to package.json if it doesn't exist
       const pkgJson = JSON.parse(await fs.readFile('package.json', 'utf-8'));
       if (!pkgJson.scripts?.prepare?.includes('husky')) {
         pkgJson.scripts = {
           ...pkgJson.scripts,
-          prepare: pkgJson.scripts?.prepare ? `${pkgJson.scripts.prepare} && husky install` : 'husky install',
+          prepare: pkgJson.scripts?.prepare ? `${pkgJson.scripts.prepare} && npx husky init` : 'npx husky init',
         };
         await fs.writeFile('package.json', JSON.stringify(pkgJson, null, 2));
       }
@@ -93,19 +93,17 @@ export async function setupGitHooks(): Promise<void> {
         continue;
       }
 
-      // Create hook file with shebang and command
-      const hookContent = ['#!/usr/bin/env sh', '. "$(dirname -- "$0")/_/husky.sh"', '', hook.command].join('\n');
+      // Create hook file with just the command (new husky format)
+      const hookContent = hook.command;
 
       await fs.writeFile(hookPath, hookContent, { mode: 0o755 });
     }
 
     // Setup commitlint if not already configured
     if (!hasCommitlint) {
-      // Add commitlint config
-      const commitlintConfig = {
-        extends: ['@commitlint/config-conventional'],
-      };
-      await fs.writeFile('.commitlintrc.json', JSON.stringify(commitlintConfig, null, 2));
+      // Add commitlint config using modern ES modules format
+      const commitlintConfig = `export default { extends: ['@commitlint/config-conventional'] };`;
+      await fs.writeFile('commitlint.config.js', commitlintConfig);
 
       // Install commitlint dependencies
       await execa('npm', ['install', '--save-dev', '@commitlint/cli', '@commitlint/config-conventional']);
