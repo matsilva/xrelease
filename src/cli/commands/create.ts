@@ -6,7 +6,7 @@ import { checkBranch } from '../../core/release/check-branch.js';
 import { runPreReleaseChecks } from '../../core/release/pre-release-checks.js';
 import { bumpVersion, type BumpType } from '../../core/release/bump-version.js';
 import { generateChangelog } from '../../core/release/generate-changelog.js';
-import { createAndPushTag } from '../../core/release/git-tag.js';
+import { createAndPushTag } from '../../core/git.js';
 import { execa } from 'execa';
 import { checkGitHubCLI, isGitHubCLIAuthenticated, createGitHubRelease } from '../../core/release/gh-cli.js';
 import { glob } from 'glob';

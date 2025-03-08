@@ -1,6 +1,6 @@
 {
   "name": "xrelease",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "xrelease (pronounced cross-release) helps you setup automated releases for your project for any language",
   "main": "dist/index.js",
   "bin": {
@@ -17,6 +17,7 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "prepare": "husky",
+    "release": "npm run build:relink && xrelease create --ci",
     "generate-changelog": "node scripts/generate-changelog.js"
   },
   "keywords": [
