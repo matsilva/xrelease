@@ -5,8 +5,18 @@ export type ChangelogTemplate = 'conventional' | 'simple';
 
 export async function generateChangelog(version: string, template: ChangelogTemplate = 'conventional'): Promise<void> {
   try {
-    // Get commits since last tag
-    const { stdout: commits } = await execa('git', ['log', '--oneline', '--no-merges', '$(git describe --tags --abbrev=0)..HEAD']);
+    // Try to get the last tag
+    let commits: string;
+    try {
+      const { stdout: lastTag } = await execa('git', ['describe', '--tags', '--abbrev=0']);
+      // Get commits since last tag
+      const { stdout } = await execa('git', ['log', '--oneline', '--no-merges', `${lastTag}..HEAD`]);
+      commits = stdout;
+    } catch (error) {
+      // If no tags exist, get all commits
+      const { stdout } = await execa('git', ['log', '--oneline', '--no-merges']);
+      commits = stdout;
+    }
 
     // Generate changelog content
     const date = new Date().toISOString().split('T')[0];
@@ -27,10 +37,10 @@ export async function generateChangelog(version: string, template: ChangelogTemp
       // Try to read existing changelog
       const existingChangelog = await fs.readFile('CHANGELOG.md', 'utf-8');
       const updatedChangelog = existingChangelog.replace(/^(# Changelog\n\n)?/, ''); // Remove existing header if present
-      await fs.writeFile('CHANGELOG.md', changelogContent + updatedChangelog);
+      await fs.writeFile('CHANGELOG.md', '# Changelog\n\n' + changelogContent + updatedChangelog);
     } catch (error) {
       // If file doesn't exist, create new one
-      await fs.writeFile('CHANGELOG.md', changelogContent);
+      await fs.writeFile('CHANGELOG.md', '# Changelog\n\n' + changelogContent);
     }
   } catch (error) {
     if (error instanceof Error && error.message.includes('ENOENT')) {
