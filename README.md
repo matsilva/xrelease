@@ -64,6 +64,49 @@ release-toolkit init
 
 This will create a `.release-toolkit.yml` configuration file in your project root.
 
+3. Set up conventional commits (optional but recommended):
+
+```bash
+# Install necessary dependencies
+npm install --save-dev @commitlint/cli @commitlint/config-conventional husky
+
+# Initialize husky
+npx husky install
+
+# Add commit-msg hook for commitlint
+npx husky add .husky/commit-msg 'npx --no -- commitlint --edit "$1"'
+
+# Create commitlint config file
+echo "module.exports = {extends: ['@commitlint/config-conventional']}" > commitlint.config.js
+```
+
+This setup will enforce conventional commit messages with the following format:
+
+```
+type(scope): subject
+
+[optional body]
+[optional footer(s)]
+```
+
+Valid types:
+
+- feat: A new feature
+- fix: A bug fix
+- docs: Documentation changes
+- style: Code style changes (formatting, etc)
+- refactor: Code refactoring
+- test: Adding or modifying tests
+- chore: Maintenance tasks
+
+Example commit messages:
+
+```
+feat(auth): add OAuth2 support
+fix(api): handle null response from endpoint
+docs(readme): update installation instructions
+```
+
 ### 3. Configuration
 
 Edit `.release-toolkit.yml` to match your project needs:

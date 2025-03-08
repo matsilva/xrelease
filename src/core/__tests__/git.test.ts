@@ -10,6 +10,10 @@ vi.mock('fs/promises');
 vi.mock('path');
 
 describe('setupGitHooks', () => {
+  const mockPackageJson = {
+    scripts: {},
+  };
+
   beforeEach(() => {
     // Reset all mocks before each test
     vi.resetAllMocks();
@@ -18,6 +22,12 @@ describe('setupGitHooks', () => {
     vi.mocked(fs.mkdir).mockResolvedValue(undefined);
     vi.mocked(fs.writeFile).mockResolvedValue(undefined);
     vi.mocked(fs.access).mockRejectedValue(new Error('File not found'));
+    vi.mocked(fs.readFile).mockImplementation((path) => {
+      if (path === 'package.json') {
+        return Promise.resolve(JSON.stringify(mockPackageJson));
+      }
+      throw new Error('File not found');
+    });
     vi.mocked(path.join).mockImplementation((...args) => args.join('/'));
     vi.mocked(execa).mockResolvedValue({ stdout: '', stderr: '' } as any);
   });
@@ -55,8 +65,13 @@ describe('setupGitHooks', () => {
   });
 
   it('should skip creating commitlint config if it already exists', async () => {
-    // Mock fs.access to indicate file exists
-    vi.mocked(fs.access).mockResolvedValue(undefined);
+    // Mock fs.access to indicate commitlint config exists
+    vi.mocked(fs.access).mockImplementation((path) => {
+      if (path === '.commitlintrc.json') {
+        return Promise.resolve(undefined);
+      }
+      return Promise.reject(new Error('File not found'));
+    });
 
     await setupGitHooks();
 
@@ -75,5 +90,49 @@ describe('setupGitHooks', () => {
     vi.mocked(fs.mkdir).mockRejectedValue(new Error(errorMessage));
 
     await expect(setupGitHooks()).rejects.toThrow(`Failed to setup Git hooks: ${errorMessage}`);
+  });
+
+  it('should skip husky setup if already configured', async () => {
+    // Mock package.json with husky in prepare script
+    vi.mocked(fs.readFile).mockImplementation((path) => {
+      if (path === 'package.json') {
+        return Promise.resolve(
+          JSON.stringify({
+            scripts: {
+              prepare: 'husky install',
+            },
+          })
+        );
+      }
+      throw new Error('File not found');
+    });
+
+    await setupGitHooks();
+
+    // Should not initialize husky again
+    expect(execa).not.toHaveBeenCalledWith('npx', ['husky', 'install']);
+  });
+
+  it('should skip commitlint setup if already configured in package.json', async () => {
+    // Mock package.json with commitlint config
+    vi.mocked(fs.readFile).mockImplementation((path) => {
+      if (path === 'package.json') {
+        return Promise.resolve(
+          JSON.stringify({
+            scripts: {},
+            commitlint: {
+              extends: ['@commitlint/config-conventional'],
+            },
+          })
+        );
+      }
+      throw new Error('File not found');
+    });
+
+    await setupGitHooks();
+
+    // Should not create commitlint config or install dependencies
+    expect(fs.writeFile).not.toHaveBeenCalledWith('.commitlintrc.json', expect.any(String));
+    expect(execa).not.toHaveBeenCalledWith('npm', expect.arrayContaining(['@commitlint/cli']));
   });
 });
