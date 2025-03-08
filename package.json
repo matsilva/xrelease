@@ -9,6 +9,7 @@
     "type": "module",
     "scripts": {
         "build": "tsc",
+        "build:link": "npm run build && chmod +x dist/cli/index.js && npm link",
         "test": "vitest run",
         "test:watch": "vitest",
         "test:coverage": "vitest run --coverage",
