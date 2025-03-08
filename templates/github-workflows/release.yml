@@ -1,9 +1,29 @@
+# Rename this to whatever you want to call the workflow, or leave as is
 name: Release
 
+# Manual trigger
 on:
-  push:
-    tags:
-      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version_bump:
+        description: 'Version bump type'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+
+# For automatic trigger, use this instead:
+# on:
+#   push:
+#     branches: [main]
+#   # Or trigger from another workflow:
+#   # workflow_call:
+#   #   secrets:
+#   #     NPM_TOKEN:
+#   #       required: true
 
 jobs:
   release:
@@ -11,36 +31,35 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 0 # Important for correct version calculation
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '22'
+          # node-version-file: '.nvmrc' # or use a .nvmrc file instead
           registry-url: 'https://registry.npmjs.org'
 
-      - name: Install dependencies
-        run: npm ci
+      # Configure Git user - if you want to use a different user, or leave as is to use the default git bot user
+      - name: Configure Git
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
 
-      - name: Run tests
-        run: npm test
-
-      - name: Build
-        run: npm run build
-
-      - name: Generate changelog
-        run: npm run generate-changelog
-
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
-        with:
-          body_path: CHANGELOG.md
-          draft: false
-          prerelease: false
+      # xrelease will:
+      # 1. Update version in package.json
+      # 2. Generate/update CHANGELOG.md
+      # 3. Commit these changes with message "chore(release): x.y.z"
+      # 4. Create and push git tag vx.y.z
+      # 5. Create GitHub release from the changelog
+      - name: Create Release
+        run: npx xrelease create --ci --bump ${{ inputs.version_bump }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      # At this point, the new version is tagged and released,
+      # and all changes are committed back to the repository
       - name: Publish to NPM
         run: npm publish
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }} 
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
