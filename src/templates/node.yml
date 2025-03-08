@@ -31,6 +31,3 @@ release:
   actions:
     - type: git-tag
     - type: github-release
-    - type: custom
-      name: 'npm-publish'
-      command: 'npm publish'

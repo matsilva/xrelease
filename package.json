@@ -66,5 +66,9 @@
   },
   "engines": {
     "node": ">=18"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/matsilva/xrelease.git"
   }
 }
