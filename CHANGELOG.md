@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.5] - 2025-03-08
+
+* chore: add npm install
+* chore: update GitHub Actions workflow with build and dependency steps
+* chore: release v0.1.4
+
 ## [0.1.4] - 2025-03-08
 
 * feat: add commit-push action to release workflow
