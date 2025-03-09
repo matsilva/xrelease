@@ -3,7 +3,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import type { ComponentConfig, TemplateConfig } from '../types/index.js';
 
-const TEMPLATE_DIR = path.join(path.dirname(fileURLToPath(import.meta.url)), '../../templates');
+const TEMPLATE_DIR = path.join(path.dirname(fileURLToPath(import.meta.url)), '../templates');
 
 const TEMPLATES: Record<string, Record<string, TemplateConfig[]>> = {
   workflow: {
@@ -96,3 +96,5 @@ async function processTemplates(templates: TemplateConfig[]): Promise<void> {
     await fs.writeFile(template.destination, content);
   }
 }
+
+//TODO: move the xrelease template logic to this file

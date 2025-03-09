@@ -66,7 +66,7 @@ export async function initCommand(options: InitOptions): Promise<void> {
 
     // Get template path for .xrelease.yml
     const __dirname = path.dirname(fileURLToPath(import.meta.url));
-    const templatePath = path.join(__dirname, '../../templates', `${components.language}.yml`);
+    const templatePath = path.join(__dirname, '../../templates', `xrelease.${components.language}.yml`);
 
     // Create package.json if it doesn't exist (for version tracking)
     spinner.start('Creating package.json...');
