@@ -28,6 +28,9 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write # Required for creating releases and tags
+      pull-requests: write # Required if you want to create PRs
     steps:
       - uses: actions/checkout@v4
         with:

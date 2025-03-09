@@ -18,6 +18,9 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write # Required for creating releases and tags
+      pull-requests: write # Required if you want to create PRs
     steps:
       - uses: actions/checkout@v4
         with:
@@ -32,10 +35,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
-
-      - name: Install xrelease
-        run: npm install -g xrelease
+          node-version: '22'
 
       - name: Configure Git
         run: |
@@ -59,7 +59,7 @@ jobs:
       # 5. Create and push git tag vx.y.z
       # 6. Create GitHub release from the changelog
       - name: Create Release
-        run: xrelease create --ci --bump ${{ inputs.version_bump }}
+        run: npx xrelease create --ci --bump ${{ inputs.version_bump }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
