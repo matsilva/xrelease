@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.3.0] - 2025-03-09
+
+* feat: add support for custom installation directory
+* chore: package json creation order
+* chore: release v0.2.4
+
 ## [0.2.4] - 2025-03-09
 
 * refactor: improve template setup status updates
