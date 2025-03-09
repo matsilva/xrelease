@@ -10,17 +10,12 @@ import { commitAndPush, createAndPushTag } from '../../core/git.js';
 import { execa } from 'execa';
 import { checkGitHubCLI, isGitHubCLIAuthenticated, createGitHubRelease } from '../../core/release/gh-cli.js';
 import { glob } from 'glob';
-import { Action as ConfigAction } from '../../core/config.js';
 
 interface CreateOptions {
   ci?: boolean;
   bump?: BumpType;
   branch?: string;
   config?: string;
-}
-
-interface Action extends ConfigAction {
-  type: 'git-tag' | 'github-release' | 'custom';
 }
 
 export async function createCommand(options: CreateOptions): Promise<void> {
