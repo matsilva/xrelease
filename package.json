@@ -4,7 +4,7 @@
   "description": "xrelease (pronounced cross-release) helps you setup automated releases for your project for any language",
   "main": "dist/index.js",
   "bin": {
-    "xrelease": "./dist/cli/index.js"
+    "xrelease": "dist/cli/index.js"
   },
   "type": "module",
   "scripts": {
@@ -69,6 +69,6 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/matsilva/xrelease.git"
+    "url": "git+https://github.com/matsilva/xrelease.git"
   }
 }
