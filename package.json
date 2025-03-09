@@ -8,7 +8,7 @@
   },
   "type": "module",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && cp -r src/templates dist/templates",
     "build:local:link": "npm run build && chmod +x dist/cli/index.js && npm link",
     "build:local:relink": "npm unlink xrelease && npm run build:link",
     "test": "vitest run",
