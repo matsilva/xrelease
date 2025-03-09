@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.3.1] - 2025-03-09
+
+* fix:  upload artifacts
+* chore: add asset publishing examples
+* fix: add default esm module
+* chore: add comments on go template version
+* fix: go mod version
+* fix: use go mod version if its available for package version
+* fix: add node_modules to gitignore
+* chore: release v0.3.0
+
 ## [0.3.0] - 2025-03-09
 
 * feat: add support for custom installation directory
