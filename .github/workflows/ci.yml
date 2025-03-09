@@ -35,3 +35,8 @@ jobs:
 
       - name: Test
         run: npm run test
+
+      - name: Release
+        uses: ./.github/workflows/release.yml
+        with:
+          version_bump: patch

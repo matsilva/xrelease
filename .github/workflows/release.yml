@@ -14,6 +14,12 @@ on:
           - patch
           - minor
           - major
+  workflow_call:
+    inputs:
+      version_bump:
+        required: true
+        default: 'patch'
+        type: string
 
 # For automatic trigger, use this instead:
 # on:
