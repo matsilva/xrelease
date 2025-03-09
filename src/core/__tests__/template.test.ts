@@ -214,30 +214,45 @@ describe('updateVersionInFile', () => {
   });
 
   it('should preserve module path in go.mod while updating', async () => {
-    // Create test go.mod
-    const modulePath = 'github.com/user/project';
-    const goModContent = `module ${modulePath}
+    // Test cases for different module path formats
+    const testCases = [
+      {
+        desc: 'module path without version',
+        input: 'module github.com/user/project',
+        expected: 'module github.com/user/project',
+      },
+      {
+        desc: 'module path with version',
+        input: 'module github.com/user/project/v2',
+        expected: 'module github.com/user/project/v2',
+      },
+    ];
+
+    for (const tc of testCases) {
+      // Create test go.mod
+      const goModContent = `${tc.input}
 
 go 1.22.5
 
 require (
     github.com/alecthomas/kong v1.8.1
 )`;
-    const goModPath = path.join(TEST_DIR, 'go.mod');
-    await fs.writeFile(goModPath, goModContent);
+      const goModPath = path.join(TEST_DIR, 'go.mod');
+      await fs.writeFile(goModPath, goModContent);
 
-    // Update with pattern that should preserve module path
-    await updateVersionInFile({
-      path: goModPath,
-      pattern: '^module\\s+([^\\s]+)',
-      template: 'module ${1}',
-      version: '2.0.0', // This version should not affect the output
-    });
+      // Update with pattern that should preserve module path
+      await updateVersionInFile({
+        path: goModPath,
+        pattern: '^module\\s+([^\\s]+)',
+        template: 'module ${1}',
+        version: '2.0.0', // This version should not affect the output
+      });
 
-    // Verify module path is preserved
-    const updated = await fs.readFile(goModPath, 'utf-8');
-    expect(updated).toContain(`module ${modulePath}`);
-    expect(updated).not.toContain('${1}'); // Make sure template placeholder is replaced
+      // Verify module path is preserved exactly as it was
+      const updated = await fs.readFile(goModPath, 'utf-8');
+      expect(updated).toContain(tc.expected);
+      expect(updated).not.toContain('${1}'); // Make sure template placeholder is replaced
+    }
   });
 
   it('should handle multiple capture groups', async () => {
