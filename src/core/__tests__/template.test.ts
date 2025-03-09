@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { setupTemplates } from '../template.js';
+import { setupTemplates, updateVersionInFile } from '../template.js';
 import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -177,5 +177,97 @@ require (
     // Verify go.mod still has the full module path
     const updatedGoMod = await fs.readFile(path.join(TEST_DIR, 'go.mod'), 'utf-8');
     expect(updatedGoMod).toContain(`module ${modulePath}`);
+  });
+});
+
+describe('updateVersionInFile', () => {
+  beforeEach(async () => {
+    // Clean up and create test directory
+    try {
+      await fs.rm(TEST_DIR, { recursive: true, force: true });
+    } catch {
+      // Directory might not exist, that's fine
+    }
+    await fs.mkdir(TEST_DIR, { recursive: true });
+  });
+
+  it('should update version in package.json', async () => {
+    // Create test package.json
+    const pkgJson = {
+      name: 'test-project',
+      version: '1.0.0',
+    };
+    const pkgPath = path.join(TEST_DIR, 'package.json');
+    await fs.writeFile(pkgPath, JSON.stringify(pkgJson, null, 2));
+
+    // Update version
+    await updateVersionInFile({
+      path: pkgPath,
+      pattern: '"version":\\s*"([^"]+)"',
+      template: '"version": "${version}"',
+      version: '2.0.0',
+    });
+
+    // Verify update
+    const updated = JSON.parse(await fs.readFile(pkgPath, 'utf-8'));
+    expect(updated.version).toBe('2.0.0');
+  });
+
+  it('should preserve module path in go.mod while updating', async () => {
+    // Create test go.mod
+    const modulePath = 'github.com/user/project';
+    const goModContent = `module ${modulePath}
+
+go 1.22.5
+
+require (
+    github.com/alecthomas/kong v1.8.1
+)`;
+    const goModPath = path.join(TEST_DIR, 'go.mod');
+    await fs.writeFile(goModPath, goModContent);
+
+    // Update with pattern that should preserve module path
+    await updateVersionInFile({
+      path: goModPath,
+      pattern: '^module\\s+([^\\s]+)',
+      template: 'module ${1}',
+      version: '2.0.0', // This version should not affect the output
+    });
+
+    // Verify module path is preserved
+    const updated = await fs.readFile(goModPath, 'utf-8');
+    expect(updated).toContain(`module ${modulePath}`);
+    expect(updated).not.toContain('${1}'); // Make sure template placeholder is replaced
+  });
+
+  it('should handle multiple capture groups', async () => {
+    // Create test file with multiple groups
+    const testPath = path.join(TEST_DIR, 'test.txt');
+    await fs.writeFile(testPath, 'prefix-abc-xyz-suffix');
+
+    // Update with multiple capture groups
+    await updateVersionInFile({
+      path: testPath,
+      pattern: 'prefix-([^-]+)-([^-]+)-suffix',
+      template: 'prefix-${1}-${version}-${2}-suffix',
+      version: '2.0.0',
+    });
+
+    // Verify all placeholders are replaced correctly
+    const updated = await fs.readFile(testPath, 'utf-8');
+    expect(updated).toBe('prefix-abc-2.0.0-xyz-suffix');
+  });
+
+  it('should throw error if file does not exist', async () => {
+    const nonExistentPath = path.join(TEST_DIR, 'nonexistent.txt');
+
+    await expect(
+      updateVersionInFile({
+        path: nonExistentPath,
+        pattern: 'version:\\s*(.*)',
+        template: 'version: ${version}',
+        version: '1.0.0',
+      })
+    ).rejects.toThrow();
   });
 });

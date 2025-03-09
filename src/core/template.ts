@@ -116,7 +116,7 @@ export async function setupPackageJson(dir = process.cwd(), language = 'node'): 
   }
 }
 
-async function processTemplates(templates: TemplateConfig[], baseDestDir = process.cwd()): Promise<void> {
+export async function processTemplates(templates: TemplateConfig[], baseDestDir = process.cwd()): Promise<void> {
   for (const template of templates) {
     const sourcePath = path.join(TEMPLATE_DIR, template.source);
     const destPath = path.join(baseDestDir, template.destination);
@@ -134,6 +134,59 @@ async function processTemplates(templates: TemplateConfig[], baseDestDir = proce
     // Write to destination
     await fs.writeFile(destPath, content);
   }
+}
+
+/**
+ * Updates version strings in a file using regex pattern and template.
+ * Supports both ${version} for new version and ${N} for regex capture groups.
+ *
+ * @example
+ * // Update go.mod module path while preserving the path
+ * await updateVersionInFile({
+ *   path: 'go.mod',
+ *   pattern: '^module\\s+([^\\s]+)',
+ *   template: 'module ${1}',
+ *   version: '1.0.0'
+ * });
+ *
+ * // Update package.json version
+ * await updateVersionInFile({
+ *   path: 'package.json',
+ *   pattern: '"version":\\s*"([^"]+)"',
+ *   template: '"version": "${version}"',
+ *   version: '1.0.0'
+ * });
+ */
+export async function updateVersionInFile({
+  path: filePath,
+  pattern,
+  template,
+  version,
+}: {
+  path: string;
+  pattern: string;
+  template: string;
+  version: string;
+}): Promise<void> {
+  const content = await fs.readFile(filePath, 'utf-8');
+  const regex = new RegExp(pattern);
+
+  // Handle both ${version} and ${N} capture group references
+  const newContent = content.replace(regex, (...args) => {
+    let result = template;
+
+    // Replace ${version} with the new version
+    result = result.replace(/\$\{version\}/g, version);
+
+    // Replace ${N} with capture groups (args[1] is first group, args[2] second, etc)
+    for (let i = 1; i < args.length - 2; i++) {
+      result = result.replace(new RegExp(`\\$\\{${i}\\}`, 'g'), args[i]);
+    }
+
+    return result;
+  });
+
+  await fs.writeFile(filePath, newContent);
 }
 
 //TODO: move the xrelease template logic to this file

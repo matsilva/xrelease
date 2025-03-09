@@ -16,8 +16,7 @@
     "test:coverage": "vitest run --coverage",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "prepare": "husky",
-    "publish": "git checkout main && git pull && npm run build && npm publish",
+    "prepare": "echo 'nothing to do'",
     "release:local": "npm run build:relink && xrelease create",
     "generate-changelog": "node scripts/generate-changelog.js"
   },

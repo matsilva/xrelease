@@ -10,6 +10,7 @@ import { commitAndPush, createAndPushTag } from '../../core/git.js';
 import { execa } from 'execa';
 import { checkGitHubCLI, isGitHubCLIAuthenticated, createGitHubRelease } from '../../core/release/gh-cli.js';
 import { glob } from 'glob';
+import { updateVersionInFile } from '../../core/template.js';
 
 interface CreateOptions {
   bump?: BumpType;
@@ -44,10 +45,12 @@ export async function createCommand(options: CreateOptions): Promise<void> {
       spinner.start('Updating version in configured files...');
       for (const file of config.release.version.files) {
         try {
-          const content = await fs.readFile(file.path, 'utf-8');
-          const regex = new RegExp(file.pattern);
-          const newContent = content.replace(regex, file.template.replace('${version}', newVersion));
-          await fs.writeFile(file.path, newContent);
+          await updateVersionInFile({
+            path: file.path,
+            pattern: file.pattern,
+            template: file.template,
+            version: newVersion,
+          });
         } catch (error) {
           throw new Error(`Failed to update version in ${file.path}: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
