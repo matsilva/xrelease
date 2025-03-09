@@ -2,16 +2,20 @@
 
 > "I build in Python, Go, Scala, Node, Swift... got tired of each having its own release dance. So I made one that Just Works™ for everything." - [@matsilva](https://x.com/MatSilva)
 
-## TL;DR
+## TL;DR - Yet Another Release Tool™
 
-```bash
-npm install -g xrelease  # Install it
-cd your-project         # Go to your project
-xrelease init          # Set it up (takes 30 seconds)
-xrelease create        # Create a release! 🚀
-```
+"Look, I just wanted releases to suck less. No plugins, no drama, just releases."
 
-That's it! It'll figure out the rest. Need more control? Check `docs/`.
+What it does:
+
+- Works with any language
+- One config file that humans can read
+- Same commands everywhere
+- Just shell commands under the hood
+
+That's it. That's the pitch.
+
+Want the fancy marketing speak? See `docs/`. Want the legal mumbo jumbo? See `docs/legal/ymmv.md`. Want to just ship code? `xrelease create` 🚀
 
 ## What It Does
 
@@ -19,6 +23,8 @@ That's it! It'll figure out the rest. Need more control? Check `docs/`.
 - 🤖 Handles versioning, changelogs, git tags
 - 🔄 Same workflow everywhere - learn once, use everywhere
 - 🎯 Zero config needed (but fully customizable if you want)
+- 🔋 Batteries included - no plugins required for core features
+-
 
 ## Common Commands
 
@@ -47,6 +53,10 @@ xrelease uses `package.json` as the single source of truth for versioning in ALL
 - 🔄 Proven, battle-tested version bumping
 - 🛠 Works with existing tools and CI systems
 - 📦 Minimal config (just version, marked as private)
+
+Learn more about [why package.json](./docs/why_package_json.md)
+
+\*\* Terms and conditions may apply, see [docs/legal/ymmv.md](docs/legal/ymmv.md)
 
 ## License
 
