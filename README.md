@@ -1,5 +1,7 @@
 # xrelease
 
+[![CI](https://github.com/matsilva/xrelease/actions/workflows/ci.yml/badge.svg)](https://github.com/matsilva/xrelease/actions/workflows/ci.yml)
+
 > "I build in Python, Go, Scala, Node, Swift... got tired of each having its own release dance. So I made one that Just Works™ for everything." - [@matsilva](https://x.com/MatSilva)
 
 ## TL;DR - Yet Another Release Tool™
@@ -33,6 +35,34 @@ xrelease create        # Create a release
 xrelease create -M     # Major release
 xrelease create -m     # Minor release
 xrelease create -p     # Patch release
+```
+
+## CLI Options TL;DR
+
+### `xrelease init`
+
+```bash
+-y, --yes              # Skip prompts and use defaults
+-l, --language <type>  # Project language (node, go)
+```
+
+### `xrelease create`
+
+```bash
+-M, --major           # Create major release
+-m, --minor           # Create minor release
+-p, --patch           # Create patch release
+--bump <type>         # Specify version bump (major, minor, patch)
+--branch <name>       # Branch to create release from
+--config <path>       # Path to config file
+```
+
+### `xrelease add`
+
+```bash
+workflow   # Add GitHub Actions workflow
+changelog  # Add changelog configuration
+hooks     # Add Git hooks configuration
 ```
 
 ## More Details

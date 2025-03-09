@@ -27,7 +27,7 @@ xrelease --version
 node --version  # Should be 18 or later
 
 # Clone the repository
-git clone https://github.com/yourusername/xrelease.git
+git clone https://github.com/matsilva/xrelease.git
 cd xrelease
 
 # Install dependencies

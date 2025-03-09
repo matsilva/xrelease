@@ -20,15 +20,6 @@ jobs:
       - run: xrelease create
 ```
 
-## CLI Options
-
-### --dry-run
-
-- Purpose: Test release process
-- Creates: Nothing
-- Shows: What would happen
-- Example: `xrelease create --dry-run`
-
 ## CI Platform Examples
 
 ### GitHub Actions (Full)
