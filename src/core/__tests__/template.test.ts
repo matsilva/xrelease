@@ -105,4 +105,36 @@ describe('setupTemplates', () => {
   it('should show final success message when all templates are configured', async () => {
     await setupTemplates({ workflow: true, changelog: true, hooks: false }, TEMPLATES, TEST_DIR);
   });
+
+  it('should use module name from go.mod only when language is go', async () => {
+    // Create a go.mod file first
+    const goModContent = `module github.com/silvabyte/AudeticLinkInstaller
+
+go 1.22.5
+
+require (
+    github.com/alecthomas/kong v1.8.1
+    github.com/fatih/color v1.16.0
+)`;
+    await fs.writeFile(path.join(TEST_DIR, 'go.mod'), goModContent);
+
+    // Test with Go language - should use go.mod name
+    await setupTemplates({ workflow: true, changelog: false, hooks: false, language: 'go' }, TEMPLATES, TEST_DIR);
+    let pkgJson = JSON.parse(await fs.readFile(path.join(TEST_DIR, 'package.json'), 'utf-8'));
+    expect(pkgJson).toEqual({
+      name: 'AudeticLinkInstaller',
+      version: '0.1.0',
+      private: true,
+    });
+
+    // Delete package.json and test with Node language - should use directory name
+    await fs.unlink(path.join(TEST_DIR, 'package.json'));
+    await setupTemplates({ workflow: true, changelog: false, hooks: false, language: 'node' }, TEMPLATES, TEST_DIR);
+    pkgJson = JSON.parse(await fs.readFile(path.join(TEST_DIR, 'package.json'), 'utf-8'));
+    expect(pkgJson).toEqual({
+      name: path.basename(TEST_DIR),
+      version: '0.1.0',
+      private: true,
+    });
+  });
 });

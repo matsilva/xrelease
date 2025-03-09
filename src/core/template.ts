@@ -43,7 +43,7 @@ export async function setupTemplates(components: ComponentConfig, templates: typ
   try {
     // Create package.json if it doesn't exist (for version tracking)
     spinner.start('Creating package.json...');
-    const pkgStatus = await setupPackageJson(destDir);
+    const pkgStatus = await setupPackageJson(destDir, components.language);
     if (pkgStatus === 'exists') {
       spinner.succeed('package.json already exists');
     } else {
@@ -73,16 +73,32 @@ export async function setupTemplates(components: ComponentConfig, templates: typ
   }
 }
 
-export async function setupPackageJson(dir = process.cwd()): Promise<string> {
+export async function setupPackageJson(dir = process.cwd(), language = 'node'): Promise<string> {
   try {
     await fs.access(path.join(dir, 'package.json'));
     return 'exists';
   } catch {
+    let packageName = path.basename(dir);
+
+    // Only try to get name from go.mod if language is Go
+    if (language === 'go') {
+      try {
+        const goModContent = await fs.readFile(path.join(dir, 'go.mod'), 'utf-8');
+        const moduleMatch = goModContent.match(/^module\s+([^\s]+)/m);
+        if (moduleMatch) {
+          // Extract just the last part of the module path
+          packageName = moduleMatch[1].split('/').pop() || packageName;
+        }
+      } catch {
+        // go.mod doesn't exist or can't be read, use directory name
+      }
+    }
+
     await fs.writeFile(
       path.join(dir, 'package.json'),
       JSON.stringify(
         {
-          name: path.basename(dir),
+          name: packageName,
           version: '0.1.0',
           private: true,
         },
