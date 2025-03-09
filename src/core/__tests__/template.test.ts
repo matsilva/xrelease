@@ -28,6 +28,10 @@ describe('setupTemplates', () => {
       name: path.basename(TEST_DIR),
       version: '0.1.0',
       private: true,
+      type: 'module',
+      scripts: {
+        test: 'echo "add your test command here"',
+      },
     });
   });
 
@@ -37,6 +41,10 @@ describe('setupTemplates', () => {
       name: 'existing-project',
       version: '1.0.0',
       private: true,
+      type: 'module',
+      scripts: {
+        test: 'echo "add your test command here"',
+      },
     };
     await fs.writeFile(path.join(TEST_DIR, 'package.json'), JSON.stringify(existingPkg, null, 2));
 
@@ -125,6 +133,10 @@ require (
       name: 'AudeticLinkInstaller',
       version: '0.1.0',
       private: true,
+      type: 'module',
+      scripts: {
+        test: 'echo "add your test command here"',
+      },
     });
 
     // Delete package.json and test with Node language - should use directory name
@@ -135,6 +147,10 @@ require (
       name: path.basename(TEST_DIR),
       version: '0.1.0',
       private: true,
+      type: 'module',
+      scripts: {
+        test: 'echo "add your test command here"',
+      },
     });
   });
 

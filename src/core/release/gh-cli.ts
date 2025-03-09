@@ -19,22 +19,24 @@ export async function isGitHubCLIAuthenticated(): Promise<boolean> {
 }
 
 export async function createGitHubRelease({ version, body, assets }: { version: string; body?: string; assets?: string[] }): Promise<void> {
-  const args = ['release', 'create', `v${version}`];
+  const tagName = `v${version}`;
 
-  // Add release notes if provided
+  // Create the release first
+  const createArgs = ['release', 'create', tagName];
   if (body) {
-    args.push('--notes', body);
-  }
-
-  // Add assets if provided
-  if (assets?.length) {
-    for (const asset of assets) {
-      args.push('--attach', asset);
-    }
+    createArgs.push('--notes', body);
   }
 
   try {
-    await execa('gh', args);
+    // Create the release
+    await execa('gh', createArgs);
+
+    // Upload assets if provided
+    if (assets?.length) {
+      // Use upload command with all assets at once for better performance
+      const uploadArgs = ['release', 'upload', tagName, ...assets];
+      await execa('gh', uploadArgs);
+    }
   } catch (error) {
     throw new Error(`Failed to create GitHub release: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }

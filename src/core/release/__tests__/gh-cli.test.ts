@@ -37,24 +37,57 @@ describe('GitHub CLI utilities', () => {
     it('should create a release with version only', async () => {
       await createGitHubRelease({ version: '1.0.0' });
       expect(execa).toHaveBeenCalledWith('gh', ['release', 'create', 'v1.0.0']);
+      expect(execa).toHaveBeenCalledTimes(1);
     });
 
     it('should create a release with notes', async () => {
       await createGitHubRelease({ version: '1.0.0', body: 'Release notes' });
       expect(execa).toHaveBeenCalledWith('gh', ['release', 'create', 'v1.0.0', '--notes', 'Release notes']);
+      expect(execa).toHaveBeenCalledTimes(1);
     });
 
-    it('should create a release with assets', async () => {
+    it('should create a release and upload assets', async () => {
       await createGitHubRelease({
         version: '1.0.0',
         assets: ['dist/app.js', 'dist/app.css'],
       });
-      expect(execa).toHaveBeenCalledWith('gh', ['release', 'create', 'v1.0.0', '--attach', 'dist/app.js', '--attach', 'dist/app.css']);
+
+      // Verify create and upload calls
+      expect(execa).toHaveBeenCalledTimes(2);
+      expect(execa).toHaveBeenNthCalledWith(1, 'gh', ['release', 'create', 'v1.0.0']);
+      expect(execa).toHaveBeenNthCalledWith(2, 'gh', ['release', 'upload', 'v1.0.0', 'dist/app.js', 'dist/app.css']);
+    });
+
+    it('should create a release with notes and upload assets', async () => {
+      await createGitHubRelease({
+        version: '1.0.0',
+        body: 'Release notes',
+        assets: ['dist/app.js'],
+      });
+
+      // Verify create with notes and upload calls
+      expect(execa).toHaveBeenCalledTimes(2);
+      expect(execa).toHaveBeenNthCalledWith(1, 'gh', ['release', 'create', 'v1.0.0', '--notes', 'Release notes']);
+      expect(execa).toHaveBeenNthCalledWith(2, 'gh', ['release', 'upload', 'v1.0.0', 'dist/app.js']);
     });
 
     it('should handle release creation errors', async () => {
       vi.mocked(execa).mockRejectedValueOnce(new Error('Failed to create release'));
       await expect(createGitHubRelease({ version: '1.0.0' })).rejects.toThrow('Failed to create GitHub release: Failed to create release');
+    });
+
+    it('should handle asset upload errors', async () => {
+      // Mock successful release creation but failed upload
+      vi.mocked(execa)
+        .mockResolvedValueOnce({ stdout: '' } as any) // release create succeeds
+        .mockRejectedValueOnce(new Error('Failed to upload assets')); // upload fails
+
+      await expect(
+        createGitHubRelease({
+          version: '1.0.0',
+          assets: ['dist/app.js'],
+        })
+      ).rejects.toThrow('Failed to create GitHub release: Failed to upload assets');
     });
   });
 });
