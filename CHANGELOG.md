@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.2] - 2025-03-09
+
+* chore: fix pkg version
+* chore: add publish cmd
+* chore: release v0.2.1
+
 ## [0.2.1] - 2025-03-09
 
 * chore: update usage docs again

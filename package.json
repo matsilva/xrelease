@@ -1,6 +1,6 @@
 {
   "name": "xrelease",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "xrelease (pronounced cross-release) helps you setup automated releases for your project for any language",
   "main": "dist/index.js",
   "bin": {
