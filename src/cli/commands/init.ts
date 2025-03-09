@@ -52,6 +52,15 @@ export async function initCommand(options: InitOptions): Promise<void> {
       };
     }
 
+    // Setup package.json first
+    spinner.start('Setting up package.json...');
+    const pkgStatus = await setupPackageJson();
+    if (pkgStatus === 'exists') {
+      spinner.succeed('package.json already exists');
+    } else {
+      spinner.succeed('Created package.json with default version: 0.1.0');
+    }
+
     // Setup templates
     await setupTemplates(components);
 

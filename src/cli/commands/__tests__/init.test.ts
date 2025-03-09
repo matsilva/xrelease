@@ -4,7 +4,7 @@ import inquirer from 'inquirer';
 import ora, { Ora } from 'ora';
 import chalk from 'chalk';
 import { setupGitHooks } from '../../../core/git.js';
-import { setupTemplates } from '../../../core/template.js';
+import { setupTemplates, setupPackageJson } from '../../../core/template.js';
 
 // Mock dependencies
 vi.mock('inquirer');
@@ -43,6 +43,44 @@ describe('initCommand', () => {
     vi.mocked(ora).mockReturnValue(mockSpinner as Ora);
     vi.mocked(setupGitHooks).mockResolvedValue(undefined);
     vi.mocked(setupTemplates).mockResolvedValue(undefined);
+    vi.mocked(setupPackageJson).mockResolvedValue('created');
+  });
+
+  it('should setup package.json before templates when using --yes flag', async () => {
+    await initCommand({ yes: true });
+
+    const setupPackageJsonCall = vi.mocked(setupPackageJson).mock.invocationCallOrder[0];
+    const setupTemplatesCall = vi.mocked(setupTemplates).mock.invocationCallOrder[0];
+
+    expect(setupPackageJsonCall).toBeLessThan(setupTemplatesCall);
+    expect(setupPackageJson).toHaveBeenCalled();
+    expect(setupTemplates).toHaveBeenCalledWith({
+      workflow: true,
+      changelog: true,
+      hooks: true,
+      language: 'node',
+    });
+  });
+
+  it('should setup package.json before templates when prompting for options', async () => {
+    vi.mocked(inquirer.prompt).mockResolvedValue({
+      language: 'go',
+      components: ['workflow', 'changelog'],
+    });
+
+    await initCommand({ yes: false });
+
+    const setupPackageJsonCall = vi.mocked(setupPackageJson).mock.invocationCallOrder[0];
+    const setupTemplatesCall = vi.mocked(setupTemplates).mock.invocationCallOrder[0];
+
+    expect(setupPackageJsonCall).toBeLessThan(setupTemplatesCall);
+    expect(setupPackageJson).toHaveBeenCalled();
+    expect(setupTemplates).toHaveBeenCalledWith({
+      workflow: true,
+      changelog: true,
+      hooks: false,
+      language: 'go',
+    });
   });
 
   it('should use default components when --yes flag is provided', async () => {
