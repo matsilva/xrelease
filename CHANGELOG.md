@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.4] - 2025-03-09
+
+* refactor: improve template setup status updates
+* docs: update cli tldr with brief descriptions
+* chore: release v0.2.3
+
 ## [0.2.3] - 2025-03-09
 
 * fix: copy templates to dist
