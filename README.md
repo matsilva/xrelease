@@ -35,12 +35,16 @@ xrelease create -p     # Patch release
 
 ### `xrelease init` 🏁
 
+Sets up automated releases for your project.
+
 ```bash
 -y, --yes              # Skip prompts and use defaults
 -l, --language <type>  # Project language (node, go)
 ```
 
 ### `xrelease create` 🚀
+
+Creates a new release, using the `.xrelease.yml` config steps created in `xrelease init`
 
 ```bash
 -M, --major           # Create major release
@@ -52,6 +56,8 @@ xrelease create -p     # Patch release
 ```
 
 ### `xrelease add` ➕
+
+Add specific components to your release config
 
 ```bash
 workflow   # Add GitHub Actions workflow
