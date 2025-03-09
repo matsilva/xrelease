@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.2.3] - 2025-03-09
+
+* fix: copy templates to dist
+* chore: release v0.2.2
+
 ## [0.2.2] - 2025-03-09
 
 * chore: fix pkg version
