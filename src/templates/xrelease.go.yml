@@ -6,15 +6,20 @@ release:
   # Version bump type
   defaultBump: patch
 
-  # Version file updates
+  # Version file updates - Configures how version numbers are updated in different files
   version:
     files:
+      # go.mod - Updates the module declaration while preserving the full import path
+      # Example: "module github.com/user/project" -> "module github.com/user/project"
       - path: 'go.mod'
-        pattern: "^module\\s+([^\\s]+)"
-        template: 'module ${1}'
+        pattern: "^module\\s+([^\\s]+)" # Captures the full module path after "module "
+        template: 'module ${1}' # Keeps the original module path unchanged
+
+      # package.json - Updates the version field with the new version
+      # Example: "version": "1.0.0" -> "version": "1.1.0"
       - path: 'package.json'
-        pattern: '"version":\\s*"([^"]+)"'
-        template: '"version": "${version}"'
+        pattern: '"version":\\s*"([^"]+)"' # Matches the version field value
+        template: '"version": "${version}"' # Replaces with new version from release
 
   # Changelog configuration
   changelog:
