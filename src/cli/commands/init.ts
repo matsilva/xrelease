@@ -5,7 +5,7 @@ import inquirer from 'inquirer';
 import ora from 'ora';
 import chalk from 'chalk';
 import { setupGitHooks } from '../../core/git.js';
-import { setupTemplates } from '../../core/template.js';
+import { setupPackageJson, setupTemplates } from '../../core/template.js';
 import type { InitOptions } from '../../types/index.js';
 
 export async function initCommand(options: InitOptions): Promise<void> {
@@ -53,9 +53,7 @@ export async function initCommand(options: InitOptions): Promise<void> {
     }
 
     // Setup templates
-    spinner.start('Setting up project templates...');
     await setupTemplates(components);
-    spinner.succeed('Templates configured successfully');
 
     // Setup Git hooks if selected
     if (components.hooks) {
@@ -67,27 +65,6 @@ export async function initCommand(options: InitOptions): Promise<void> {
     // Get template path for .xrelease.yml
     const __dirname = path.dirname(fileURLToPath(import.meta.url));
     const templatePath = path.join(__dirname, '../../templates', `xrelease.${components.language}.yml`);
-
-    // Create package.json if it doesn't exist (for version tracking)
-    spinner.start('Creating package.json...');
-    try {
-      await fs.access('package.json');
-      spinner.succeed('package.json already exists');
-    } catch {
-      await fs.writeFile(
-        'package.json',
-        JSON.stringify(
-          {
-            name: path.basename(process.cwd()),
-            version: '0.1.0',
-            private: true,
-          },
-          null,
-          2
-        )
-      );
-      spinner.succeed('Created package.json');
-    }
 
     // Create config file
     spinner.start(`Creating ${configFile}...`);
