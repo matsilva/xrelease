@@ -2,22 +2,14 @@
 
 [![CI](https://github.com/matsilva/xrelease/actions/workflows/ci.yml/badge.svg)](https://github.com/matsilva/xrelease/actions/workflows/ci.yml)
 
-> "I build in Python, Go, Scala, Node, Swift... got tired of each having its own release dance. So I made one that Just Works™ for everything." - [@matsilva](https://x.com/MatSilva)
-
 ## TL;DR - Yet Another Release Tool™
 
-"Look, I just wanted releases to suck less. No plugins, no drama, just releases."
+Backstory:
 
-What it does:
+- I build in Python, Go, Scala, Node, Swift... & I got tired of each having its own release dance.
+- I wanted to live in a world where I could setup automated releases for my project in one command.
 
-- Works with any language
-- One config file that humans can read
-- Same commands everywhere
-- Just shell commands under the hood
-
-That's it. That's the pitch.
-
-Want the fancy marketing speak? See `docs/`. Want the legal mumbo jumbo? See `docs/legal/ymmv.md`. Want to just ship code? `xrelease create` 🚀
+Now I can with: `xrelease create` `xrelease create` 🚀 and it Just Works™ for everything. \*\*
 
 ## What It Does
 
@@ -26,7 +18,8 @@ Want the fancy marketing speak? See `docs/`. Want the legal mumbo jumbo? See `do
 - 🔄 Same workflow everywhere - learn once, use everywhere
 - 🎯 Zero config needed (but fully customizable if you want)
 - 🔋 Batteries included - no plugins required for core features
--
+
+Want the legal disclaimers? See `docs/legal/ymmv.md`. Want to just ship code? `xrelease create` 🚀
 
 ## Common Commands
 
@@ -39,14 +32,14 @@ xrelease create -p     # Patch release
 
 ## CLI Options TL;DR
 
-### `xrelease init`
+### `xrelease init` 🏁
 
 ```bash
 -y, --yes              # Skip prompts and use defaults
 -l, --language <type>  # Project language (node, go)
 ```
 
-### `xrelease create`
+### `xrelease create` 🚀
 
 ```bash
 -M, --major           # Create major release
@@ -57,7 +50,7 @@ xrelease create -p     # Patch release
 --config <path>       # Path to config file
 ```
 
-### `xrelease add`
+### `xrelease add` ➕
 
 ```bash
 workflow   # Add GitHub Actions workflow
@@ -71,11 +64,11 @@ hooks     # Add Git hooks configuration
 - ⚙️ [Configuration Guide](docs/configuration.md)
 - 🔄 [CI/CD Integration](docs/ci-cd.md)
 
-## A Note for Scala Devs
+## A Note for Scala Devs 🎯
 
 Yes, it's built with Node.js, not "sleek, performant Scala with higher-order functions" 😉. But like `sbt` or `mill`, it's just a build tool - it won't touch your production code. Promise!... maybe
 
-## The Opinionated Bit
+## The Opinionated Bit 💭
 
 xrelease uses `package.json` as the single source of truth for versioning in ALL projects, regardless of language. Why?
 
@@ -86,7 +79,7 @@ xrelease uses `package.json` as the single source of truth for versioning in ALL
 
 Learn more about [why package.json](./docs/why_package_json.md)
 
-\*\* Terms and conditions may apply, see [docs/legal/ymmv.md](docs/legal/ymmv.md)
+\*\* Terms and conditions may apply, see [ymmv](docs/legal/ymmv.md)
 
 ## License
 
