@@ -137,4 +137,29 @@ require (
       private: true,
     });
   });
+
+  it('should handle go module paths correctly', async () => {
+    // Create a go.mod file with a full module path
+    const modulePath = 'github.com/silvabyte/AudeticLinkInstaller';
+    const goModContent = `module ${modulePath}
+
+go 1.22.5
+
+require (
+    github.com/alecthomas/kong v1.8.1
+    github.com/fatih/color v1.16.0
+)`;
+    await fs.writeFile(path.join(TEST_DIR, 'go.mod'), goModContent);
+
+    // Test with Go language
+    await setupTemplates({ workflow: true, changelog: false, hooks: false, language: 'go' }, TEMPLATES, TEST_DIR);
+
+    // Verify package.json uses just the project name
+    const pkgJson = JSON.parse(await fs.readFile(path.join(TEST_DIR, 'package.json'), 'utf-8'));
+    expect(pkgJson.name).toBe('AudeticLinkInstaller');
+
+    // Verify go.mod still has the full module path
+    const updatedGoMod = await fs.readFile(path.join(TEST_DIR, 'go.mod'), 'utf-8');
+    expect(updatedGoMod).toContain(`module ${modulePath}`);
+  });
 });

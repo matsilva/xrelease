@@ -10,8 +10,11 @@ release:
   version:
     files:
       - path: 'go.mod'
-        pattern: "module\\s+(?<module>[^\\s]+)\\s+(?<version>v\\d+)"
-        template: 'module ${module} ${version}'
+        pattern: "^module\\s+([^\\s]+)"
+        template: 'module ${1}'
+      - path: 'package.json'
+        pattern: '"version":\\s*"([^"]+)"'
+        template: '"version": "${version}"'
 
   # Changelog configuration
   changelog:
