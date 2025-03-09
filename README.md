@@ -19,8 +19,6 @@ Now I can with: `xrelease create` 🚀 and it Just Works™ for everything. \*\*
 - 🎯 Zero config needed (but fully customizable if you want)
 - 🔋 Batteries included - no plugins required for core features
 
-Want the legal disclaimers? See `docs/legal/ymmv.md`. Want to just ship code? `xrelease create` 🚀
-
 ## Common Commands
 
 ```bash
