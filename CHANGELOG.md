@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.1] - 2025-03-09
+
+* chore: update usage docs again
+* chore: fix package json git
+* chore: release v0.2.0
+
 ## [0.2.0] - 2025-03-09
 
 * chore: remove cruft
