@@ -9,7 +9,7 @@ Backstory:
 - I build in Python, Go, Scala, Node, Swift... & I got tired of each having its own release dance.
 - I wanted to live in a world where I could setup automated releases for my project in one command.
 
-Now I can with: `xrelease create` 🚀 and it Just Works™ for everything. \*\*
+Now I can with: `xrelease` 🚀 and it Just Works™ for everything. \*\*
 
 ## What It Does
 
@@ -21,8 +21,11 @@ Now I can with: `xrelease create` 🚀 and it Just Works™ for everything. \*\*
 
 ## Common Commands
 
+`npm install -g xrelease` - install xrelease
+
 ```bash
-xrelease create        # Create a release
+xrelease init          # Setup xrelease for your project
+xrelease create        # Create a release - defauts to patch
 xrelease create -M     # Major release
 xrelease create -m     # Minor release
 xrelease create -p     # Patch release
