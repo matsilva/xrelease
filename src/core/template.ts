@@ -76,6 +76,8 @@ export async function setupTemplates(components: ComponentConfig, templates: typ
 export async function setupPackageJson(dir = process.cwd(), language = 'node'): Promise<string> {
   try {
     await fs.access(path.join(dir, 'package.json'));
+    //TODO: check for esm module compatibility and provide a warning if it's not compatible
+    //TODO: check for test command and provide a warning if it is not set
     return 'exists';
   } catch {
     let packageName = path.basename(dir);
@@ -100,6 +102,10 @@ export async function setupPackageJson(dir = process.cwd(), language = 'node'): 
         {
           name: packageName,
           version: '0.1.0',
+          type: 'module',
+          scripts: {
+            test: 'echo "add your test command here"',
+          },
           private: true,
         },
         null,
