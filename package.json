@@ -17,7 +17,7 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "prepare": "husky",
-    "publish": "npm run build && npm publish",
+    "publish": "git checkout main && git pull && npm run build && npm publish",
     "release:local": "npm run build:relink && xrelease create",
     "generate-changelog": "node scripts/generate-changelog.js"
   },
