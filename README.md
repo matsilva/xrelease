@@ -9,7 +9,7 @@ Backstory:
 - I build in Python, Go, Scala, Node, Swift... & I got tired of each having its own release dance.
 - I wanted to live in a world where I could setup automated releases for my project in one command.
 
-Now I can with: `xrelease create` `xrelease create` 🚀 and it Just Works™ for everything. \*\*
+Now I can with: `xrelease create` 🚀 and it Just Works™ for everything. \*\*
 
 ## What It Does
 
