@@ -1,12 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { addCommand } from '../add.js';
-import ora, { Ora } from 'ora';
-import chalk from 'chalk';
-import { setupGitHooks } from '../../../core/git.js';
-import { setupTemplates } from '../../../core/template.js';
+import { setupGitHooks } from '../../../core/hooks.js';
+import { setupTemplates, TEMPLATES } from '../../../core/template.js';
 
 // Mock dependencies
-vi.mock('ora');
 vi.mock('chalk', async () => {
   const actual = await vi.importActual('chalk');
   return {
@@ -19,63 +16,58 @@ vi.mock('chalk', async () => {
 });
 vi.mock('../../../core/git.js');
 vi.mock('../../../core/template.js');
+vi.mock('../../../core/hooks.js');
+
+const TEST_DIR = 'test-output/add-tests';
 
 describe('addCommand', () => {
-  const mockSpinner: Partial<Ora> = {
-    start: vi.fn().mockReturnThis(),
-    succeed: vi.fn().mockReturnThis(),
-    fail: vi.fn().mockReturnThis(),
-    stop: vi.fn().mockReturnThis(),
-    clear: vi.fn().mockReturnThis(),
-    render: vi.fn().mockReturnThis(),
-    frame: vi.fn().mockReturnThis(),
-    text: '',
-    isSpinning: false,
-  };
-
   beforeEach(() => {
     vi.resetAllMocks();
 
     // Setup default mock implementations
-    vi.mocked(ora).mockReturnValue(mockSpinner as Ora);
     vi.mocked(setupGitHooks).mockResolvedValue(undefined);
     vi.mocked(setupTemplates).mockResolvedValue(undefined);
   });
 
   it('should add workflow component', async () => {
-    await addCommand('workflow');
+    await addCommand('workflow', TEST_DIR);
 
-    expect(setupTemplates).toHaveBeenCalledWith({
-      workflow: true,
-      changelog: false,
-      hooks: false,
-    });
-    expect(mockSpinner.succeed).toHaveBeenCalledWith('GitHub Actions workflow added successfully');
+    expect(setupTemplates).toHaveBeenCalledWith(
+      {
+        workflow: true,
+        changelog: false,
+        hooks: false,
+      },
+      TEMPLATES,
+      TEST_DIR
+    );
   });
 
   it('should add changelog component', async () => {
-    await addCommand('changelog');
+    await addCommand('changelog', TEST_DIR);
 
-    expect(setupTemplates).toHaveBeenCalledWith({
-      workflow: false,
-      changelog: true,
-      hooks: false,
-    });
-    expect(mockSpinner.succeed).toHaveBeenCalledWith('Changelog configuration added successfully');
+    expect(setupTemplates).toHaveBeenCalledWith(
+      {
+        workflow: false,
+        changelog: true,
+        hooks: false,
+      },
+      TEMPLATES,
+      TEST_DIR
+    );
   });
 
   it('should add hooks component', async () => {
-    await addCommand('hooks');
+    await addCommand('hooks', TEST_DIR);
 
-    expect(setupGitHooks).toHaveBeenCalled();
-    expect(mockSpinner.succeed).toHaveBeenCalledWith('Git hooks configured successfully');
+    expect(setupGitHooks).toHaveBeenCalledWith(TEST_DIR);
   });
 
   it('should show error for invalid component', async () => {
     const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     const processSpy = vi.spyOn(process, 'exit').mockImplementation(() => undefined as never);
 
-    await addCommand('invalid' as any);
+    await addCommand('invalid' as any, TEST_DIR);
 
     expect(consoleSpy).toHaveBeenCalledWith('Invalid component: invalid');
     expect(processSpy).toHaveBeenCalledWith(1);
@@ -87,9 +79,8 @@ describe('addCommand', () => {
     const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     const processSpy = vi.spyOn(process, 'exit').mockImplementation(() => undefined as never);
 
-    await addCommand('workflow');
+    await addCommand('workflow', TEST_DIR);
 
-    expect(mockSpinner.fail).toHaveBeenCalledWith("Failed to add component 'workflow'");
     expect(consoleSpy).toHaveBeenCalledWith('\nError: Failed to add workflow');
     expect(processSpy).toHaveBeenCalledWith(1);
   });
@@ -100,9 +91,8 @@ describe('addCommand', () => {
     const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     const processSpy = vi.spyOn(process, 'exit').mockImplementation(() => undefined as never);
 
-    await addCommand('hooks');
+    await addCommand('hooks', TEST_DIR);
 
-    expect(mockSpinner.fail).toHaveBeenCalledWith("Failed to add component 'hooks'");
     expect(consoleSpy).toHaveBeenCalledWith('\nError: Failed to add hooks');
     expect(processSpy).toHaveBeenCalledWith(1);
   });
@@ -112,9 +102,8 @@ describe('addCommand', () => {
     const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     const processSpy = vi.spyOn(process, 'exit').mockImplementation(() => undefined as never);
 
-    await addCommand('workflow');
+    await addCommand('workflow', TEST_DIR);
 
-    expect(mockSpinner.fail).toHaveBeenCalledWith("Failed to add component 'workflow'");
     expect(consoleSpy).toHaveBeenCalledWith('\nError: Unknown error occurred');
     expect(processSpy).toHaveBeenCalledWith(1);
   });

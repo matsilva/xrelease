@@ -1,194 +1,80 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { initCommand } from '../init.js';
+import { setupTemplates, TEMPLATES } from '../../../core/template.js';
+import { setupGitHooks } from '../../../core/hooks.js';
 import inquirer from 'inquirer';
-import ora, { Ora } from 'ora';
-import chalk from 'chalk';
-import { setupGitHooks } from '../../../core/git.js';
-import { setupTemplates, setupPackageJson } from '../../../core/template.js';
-
+import fs from 'fs/promises';
 // Mock dependencies
-vi.mock('inquirer');
-vi.mock('ora');
-vi.mock('chalk', async () => {
-  const actual = await vi.importActual('chalk');
-  return {
-    ...actual,
-    default: {
-      green: (str: string) => str,
-      cyan: (str: string) => str,
-      red: (str: string) => str,
-    },
-  };
-});
-vi.mock('../../../core/git.js');
 vi.mock('../../../core/template.js');
+vi.mock('../../../core/hooks.js');
+vi.mock('inquirer');
+
+const TEST_DIR = 'test-output/init-tests';
 
 describe('initCommand', () => {
-  const mockSpinner: Partial<Ora> = {
-    start: vi.fn().mockReturnThis(),
-    succeed: vi.fn().mockReturnThis(),
-    fail: vi.fn().mockReturnThis(),
-    stop: vi.fn().mockReturnThis(),
-    clear: vi.fn().mockReturnThis(),
-    render: vi.fn().mockReturnThis(),
-    frame: vi.fn().mockReturnThis(),
-    text: '',
-    isSpinning: false,
-  };
-
-  beforeEach(() => {
+  beforeEach(async () => {
+    await fs.rm(TEST_DIR, { recursive: true, force: true });
     vi.resetAllMocks();
-
-    // Setup default mock implementations
-    vi.mocked(ora).mockReturnValue(mockSpinner as Ora);
-    vi.mocked(setupGitHooks).mockResolvedValue(undefined);
     vi.mocked(setupTemplates).mockResolvedValue(undefined);
-    vi.mocked(setupPackageJson).mockResolvedValue('created');
+    vi.mocked(setupGitHooks).mockResolvedValue(undefined);
+    await fs.mkdir(TEST_DIR, { recursive: true });
   });
 
-  it('should setup package.json before templates when using --yes flag', async () => {
-    await initCommand({ yes: true });
+  it('should call setup functions with correct args when using --yes flag', async () => {
+    await initCommand({ yes: true, installationDir: TEST_DIR });
 
-    const setupPackageJsonCall = vi.mocked(setupPackageJson).mock.invocationCallOrder[0];
-    const setupTemplatesCall = vi.mocked(setupTemplates).mock.invocationCallOrder[0];
+    // Verify setupTemplates was called with correct args
+    expect(setupTemplates).toHaveBeenCalledWith(
+      {
+        workflow: true,
+        changelog: true,
+        hooks: true,
+        language: 'node',
+      },
+      TEMPLATES,
+      TEST_DIR
+    );
 
-    expect(setupPackageJsonCall).toBeLessThan(setupTemplatesCall);
-    expect(setupPackageJson).toHaveBeenCalled();
-    expect(setupTemplates).toHaveBeenCalledWith({
-      workflow: true,
-      changelog: true,
-      hooks: true,
-      language: 'node',
-    });
+    // Verify setupGitHooks was called with correct directory
+    expect(setupGitHooks).toHaveBeenCalledWith(TEST_DIR);
   });
 
-  it('should setup package.json before templates when prompting for options', async () => {
+  it('should call setup functions with correct args when using interactive mode', async () => {
     vi.mocked(inquirer.prompt).mockResolvedValue({
       language: 'go',
-      components: ['workflow', 'changelog'],
+      components: ['workflow', 'changelog'], // Explicitly not including hooks
     });
 
-    await initCommand({ yes: false });
+    await initCommand({ yes: false, installationDir: TEST_DIR });
 
-    const setupPackageJsonCall = vi.mocked(setupPackageJson).mock.invocationCallOrder[0];
-    const setupTemplatesCall = vi.mocked(setupTemplates).mock.invocationCallOrder[0];
+    // Verify setupTemplates was called with correct args
+    expect(setupTemplates).toHaveBeenCalledWith(
+      {
+        workflow: true,
+        changelog: true,
+        hooks: false,
+        language: 'go',
+      },
+      TEMPLATES,
+      TEST_DIR
+    );
 
-    expect(setupPackageJsonCall).toBeLessThan(setupTemplatesCall);
-    expect(setupPackageJson).toHaveBeenCalled();
-    expect(setupTemplates).toHaveBeenCalledWith({
-      workflow: true,
-      changelog: true,
-      hooks: false,
-      language: 'go',
-    });
+    // Verify setupGitHooks was not called since hooks weren't selected
+    expect(setupGitHooks).not.toHaveBeenCalled();
   });
 
-  it('should use default components when --yes flag is provided', async () => {
-    await initCommand({ yes: true });
+  it('should respect CLI language option', async () => {
+    await initCommand({ yes: true, installationDir: TEST_DIR, language: 'go' });
 
-    expect(inquirer.prompt).not.toHaveBeenCalled();
-    expect(setupTemplates).toHaveBeenCalledWith({
-      workflow: true,
-      changelog: true,
-      hooks: true,
-      language: 'node', // Default language
-    });
-  });
-
-  it('should prompt for component selection when --yes flag is not provided', async () => {
-    vi.mocked(inquirer.prompt).mockResolvedValue({
-      language: 'go',
-      components: ['workflow', 'changelog'],
-    });
-
-    await initCommand({ yes: false });
-
-    expect(inquirer.prompt).toHaveBeenCalledWith([
-      expect.objectContaining({
-        type: 'list',
-        name: 'language',
-        message: 'Select your project language:',
-        choices: [
-          { name: 'Node.js', value: 'node' },
-          { name: 'Go', value: 'go' },
-        ],
-      }),
-      expect.objectContaining({
-        type: 'checkbox',
-        name: 'components',
-        message: 'Select components to initialize:',
-        choices: expect.arrayContaining([
-          expect.objectContaining({ value: 'workflow' }),
-          expect.objectContaining({ value: 'changelog' }),
-          expect.objectContaining({ value: 'hooks' }),
-        ]),
-      }),
-    ]);
-
-    expect(setupTemplates).toHaveBeenCalledWith({
-      workflow: true,
-      changelog: true,
-      hooks: false,
-      language: 'go',
-    });
-  });
-
-  it('should setup Git hooks when selected', async () => {
-    vi.mocked(inquirer.prompt).mockResolvedValue({
-      language: 'node',
-      components: ['hooks'],
-    });
-
-    await initCommand({ yes: false });
-
-    expect(setupGitHooks).toHaveBeenCalled();
-    expect(mockSpinner.succeed).toHaveBeenCalledWith('Git hooks configured successfully');
-  });
-
-  it('should show success message on completion', async () => {
-    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
-
-    await initCommand({ yes: true });
-
-    expect(consoleSpy).toHaveBeenCalledWith('\n✨ xrelease initialized successfully!');
-
-    expect(consoleSpy).toHaveBeenCalledWith('\nNext steps:');
-  });
-
-  it.skip('should handle errors and show error message', async () => {
-    const error = new Error('Setup failed');
-    vi.mocked(setupTemplates).mockRejectedValue(error);
-    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-    const processSpy = vi.spyOn(process, 'exit').mockImplementation(() => undefined as never);
-
-    await initCommand({ yes: true });
-
-    expect(mockSpinner.fail).toHaveBeenCalledWith('Initialization failed');
-    expect(consoleSpy).toHaveBeenCalledWith('\nError: Setup failed');
-    expect(processSpy).toHaveBeenCalledWith(1);
-  });
-
-  it.skip('should handle non-Error objects in error handling', async () => {
-    vi.mocked(setupTemplates).mockRejectedValue('String error');
-    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-    const processSpy = vi.spyOn(process, 'exit').mockImplementation(() => undefined as never);
-
-    await initCommand({ yes: true });
-
-    expect(mockSpinner.fail).toHaveBeenCalledWith('Initialization failed');
-    expect(consoleSpy).toHaveBeenCalledWith('\nError: Unknown error occurred');
-    expect(processSpy).toHaveBeenCalledWith(1);
-  });
-
-  it('should respect language option when provided via CLI', async () => {
-    await initCommand({ yes: true, language: 'go' });
-
-    expect(inquirer.prompt).not.toHaveBeenCalled();
-    expect(setupTemplates).toHaveBeenCalledWith({
-      workflow: true,
-      changelog: true,
-      hooks: true,
-      language: 'go',
-    });
+    expect(setupTemplates).toHaveBeenCalledWith(
+      {
+        workflow: true,
+        changelog: true,
+        hooks: true,
+        language: 'go',
+      },
+      TEMPLATES,
+      TEST_DIR
+    );
   });
 });

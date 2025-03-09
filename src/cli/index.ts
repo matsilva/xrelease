@@ -18,6 +18,8 @@ program
   .description('Initialize xrelease')
   .option('-y, --yes', 'Skip prompts and use defaults')
   .option('-l, --language <type>', 'Project language (node, go)', 'node')
+  .option('-c, --config <path>', 'Desired path to config file', '.xrelease.yml')
+  .option('-d, --dir <path>', 'Desired installation directory', process.cwd())
   .action((options) => {
     initCommand(options);
   });
@@ -27,7 +29,10 @@ program
   .command('add')
   .description('Add individual components to your project')
   .argument('<component>', 'Component to add (workflow, changelog, hooks)')
-  .action(addCommand);
+  .option('-d, --dir <path>', 'Desired installation directory', process.cwd())
+  .action((component, options) => {
+    addCommand(component, options.dir);
+  });
 
 // Create command
 program

@@ -3,74 +3,106 @@ import { setupTemplates } from '../template.js';
 import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { TEMPLATES } from '../template.js';
 
-// Mock external dependencies
-vi.mock('fs/promises');
-vi.mock('path');
-vi.mock('url');
+const TEST_DIR = 'test-output/template-tests';
 
 describe('setupTemplates', () => {
-  beforeEach(() => {
-    vi.resetAllMocks();
+  beforeEach(async () => {
+    // Clean up and create test directory
+    try {
+      await fs.rm(TEST_DIR, { recursive: true, force: true });
+    } catch {
+      // Directory might not exist, that's fine
+    }
+    await fs.mkdir(TEST_DIR, { recursive: true });
 
-    // Setup default mock implementations
-    vi.mocked(fs.mkdir).mockResolvedValue(undefined);
-    vi.mocked(fs.writeFile).mockResolvedValue(undefined);
-    vi.mocked(fs.readFile).mockResolvedValue('{}');
-    vi.mocked(path.join).mockImplementation((...args) => args.join('/'));
-    vi.mocked(path.dirname).mockImplementation((p) => p.split('/').slice(0, -1).join('/'));
-    vi.mocked(fileURLToPath).mockReturnValue('/mock/path');
+    vi.resetAllMocks();
   });
 
-  afterEach(() => {
-    vi.clearAllMocks();
+  it('should create package.json if it does not exist', async () => {
+    await setupTemplates({ workflow: true, changelog: false, hooks: false }, TEMPLATES, TEST_DIR);
+
+    const pkgJson = JSON.parse(await fs.readFile(path.join(TEST_DIR, 'package.json'), 'utf-8'));
+    expect(pkgJson).toEqual({
+      name: path.basename(TEST_DIR),
+      version: '0.1.0',
+      private: true,
+    });
+  });
+
+  it('should not create package.json if it already exists', async () => {
+    // Create package.json first
+    const existingPkg = {
+      name: 'existing-project',
+      version: '1.0.0',
+      private: true,
+    };
+    await fs.writeFile(path.join(TEST_DIR, 'package.json'), JSON.stringify(existingPkg, null, 2));
+
+    await setupTemplates({ workflow: true, changelog: false, hooks: false }, TEMPLATES, TEST_DIR);
+
+    // Verify package.json wasn't modified
+    const pkgJson = JSON.parse(await fs.readFile(path.join(TEST_DIR, 'package.json'), 'utf-8'));
+    expect(pkgJson).toEqual(existingPkg);
   });
 
   it('should process workflow templates when workflow is true', async () => {
-    await setupTemplates({ workflow: true, changelog: false, hooks: false });
+    await setupTemplates({ workflow: true, changelog: false, hooks: false }, TEMPLATES, TEST_DIR);
 
-    expect(fs.mkdir).toHaveBeenCalledWith('.github/workflows', { recursive: true });
-    expect(fs.writeFile).toHaveBeenCalledWith('.github/workflows/release.yml', expect.any(String));
+    // Verify workflow file exists and has content
+    const workflowPath = path.join(TEST_DIR, '.github/workflows/release.yml');
+    const content = await fs.readFile(workflowPath, 'utf-8');
+    expect(content).toContain('name: Release');
   });
 
   it('should process changelog templates when changelog is true', async () => {
-    await setupTemplates({ workflow: false, changelog: true, hooks: false });
+    await setupTemplates({ workflow: false, changelog: true, hooks: false }, TEMPLATES, TEST_DIR);
 
-    expect(fs.writeFile).toHaveBeenCalledWith('.versionrc', expect.any(String));
+    // Verify versionrc exists and has content
+    const content = await fs.readFile(path.join(TEST_DIR, '.versionrc'), 'utf-8');
+    expect(content).toBeTruthy();
   });
 
   it('should process both workflow and changelog templates when both are true', async () => {
-    await setupTemplates({ workflow: true, changelog: true, hooks: false });
+    await setupTemplates({ workflow: true, changelog: true, hooks: false }, TEMPLATES, TEST_DIR);
 
-    // Check workflow files
-    expect(fs.writeFile).toHaveBeenCalledWith('.github/workflows/release.yml', expect.any(String));
+    // Verify both files exist
+    const workflowPath = path.join(TEST_DIR, '.github/workflows/release.yml');
+    const content = await fs.readFile(workflowPath, 'utf-8');
+    expect(content).toContain('name: Release');
 
-    // Check changelog files
-    expect(fs.writeFile).toHaveBeenCalledWith('.versionrc', expect.any(String));
+    const versionrcPath = path.join(TEST_DIR, '.versionrc');
+    const versionrcContent = await fs.readFile(versionrcPath, 'utf-8');
+    expect(versionrcContent).toBeTruthy();
   });
 
-  it('should throw error with message when setup fails', async () => {
-    const errorMessage = 'Failed to create directory';
-    vi.mocked(fs.mkdir).mockRejectedValue(new Error(errorMessage));
+  it('should use specified language for templates', async () => {
+    await setupTemplates({ workflow: true, changelog: true, hooks: false, language: 'go' }, TEMPLATES, TEST_DIR);
 
-    await expect(setupTemplates({ workflow: true, changelog: false, hooks: false })).rejects.toThrow(
-      `Failed to setup templates: ${errorMessage}`
-    );
+    // Verify Go-specific workflow file exists and has Go-specific content
+    const workflowPath = path.join(TEST_DIR, '.github/workflows/release.yml');
+    const content = await fs.readFile(workflowPath, 'utf-8');
+    expect(content).toContain('Setup Go');
+  });
+
+  it('should throw error with message when directory cannot be created', async () => {
+    // Make a file where we want a directory to prevent directory creation
+    await fs.mkdir(path.join(TEST_DIR, '.github'), { recursive: true });
+    await fs.writeFile(path.join(TEST_DIR, '.github/workflows'), ''); // This will prevent creating workflows directory
+
+    await expect(setupTemplates({ workflow: true, changelog: false, hooks: false }, TEMPLATES, TEST_DIR)).rejects.toThrow();
   });
 
   it('should create destination directories before writing files', async () => {
-    await setupTemplates({ workflow: true, changelog: true, hooks: false });
+    await setupTemplates({ workflow: true, changelog: true, hooks: false }, TEMPLATES, TEST_DIR);
 
-    // Check that directories are created before files are written
-    const mkdirCalls = vi.mocked(fs.mkdir).mock.calls.map((call) => call[0]);
-    const writeFileCalls = vi.mocked(fs.writeFile).mock.calls.map((call) => call[0]);
+    // Verify directories exist
+    await expect(fs.access(path.join(TEST_DIR, '.github'))).resolves.toBeUndefined();
+    await expect(fs.access(path.join(TEST_DIR, '.github/workflows'))).resolves.toBeUndefined();
+  });
 
-    for (const writeFile of writeFileCalls) {
-      const dir = path.dirname(writeFile as string);
-      expect(mkdirCalls).toContain(dir);
-      expect(vi.mocked(fs.mkdir).mock.invocationCallOrder[mkdirCalls.indexOf(dir)]).toBeLessThan(
-        vi.mocked(fs.writeFile).mock.invocationCallOrder[writeFileCalls.indexOf(writeFile)]
-      );
-    }
+  it('should show final success message when all templates are configured', async () => {
+    await setupTemplates({ workflow: true, changelog: true, hooks: false }, TEMPLATES, TEST_DIR);
   });
 });

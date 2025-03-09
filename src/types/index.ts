@@ -3,6 +3,7 @@ export interface InitOptions {
   yes?: boolean;
   language?: string;
   configPath?: string;
+  installationDir?: string;
 }
 
 // Component Configuration

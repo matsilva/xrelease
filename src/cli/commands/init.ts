@@ -4,13 +4,15 @@ import { fileURLToPath } from 'url';
 import inquirer from 'inquirer';
 import ora from 'ora';
 import chalk from 'chalk';
-import { setupGitHooks } from '../../core/git.js';
-import { setupPackageJson, setupTemplates } from '../../core/template.js';
+import { setupGitHooks } from '../../core/hooks.js';
+
+import { setupTemplates, TEMPLATES } from '../../core/template.js';
 import type { InitOptions } from '../../types/index.js';
 
 export async function initCommand(options: InitOptions): Promise<void> {
   const spinner = ora();
   const configFile = options.configPath || (process.env.NODE_ENV === 'test' ? '.testxrelease.yml' : '.xrelease.yml');
+  const installationDir = options.installationDir || process.cwd();
 
   try {
     let components = {
@@ -52,22 +54,13 @@ export async function initCommand(options: InitOptions): Promise<void> {
       };
     }
 
-    // Setup package.json first
-    spinner.start('Setting up package.json...');
-    const pkgStatus = await setupPackageJson();
-    if (pkgStatus === 'exists') {
-      spinner.succeed('package.json already exists');
-    } else {
-      spinner.succeed('Created package.json with default version: 0.1.0');
-    }
-
     // Setup templates
-    await setupTemplates(components);
+    await setupTemplates(components, TEMPLATES, installationDir);
 
     // Setup Git hooks if selected
     if (components.hooks) {
       spinner.start('Setting up Git hooks...');
-      await setupGitHooks();
+      await setupGitHooks(options.installationDir);
       spinner.succeed('Git hooks configured successfully');
     }
 
@@ -77,7 +70,6 @@ export async function initCommand(options: InitOptions): Promise<void> {
 
     // Create config file
     spinner.start(`Creating ${configFile}...`);
-
     // Read template
     const template = await fs.readFile(templatePath, 'utf-8');
 
@@ -98,14 +90,13 @@ export async function initCommand(options: InitOptions): Promise<void> {
 
     await fs.writeFile(configFile, template);
     spinner.succeed(`Created ${configFile}`);
-
     // Create .gitignore if it doesn't exist
     spinner.start('Creating .gitignore...');
     try {
-      await fs.access('.gitignore');
+      await fs.access(path.join(installationDir, '.gitignore'));
       spinner.succeed('.gitignore already exists');
     } catch {
-      await fs.writeFile('.gitignore', 'node_modules/\n.DS_Store\n');
+      await fs.writeFile(path.join(installationDir, '.gitignore'), 'node_modules/\n.DS_Store\n');
       spinner.succeed('Created .gitignore');
     }
 

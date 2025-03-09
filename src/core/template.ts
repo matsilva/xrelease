@@ -4,9 +4,9 @@ import { fileURLToPath } from 'url';
 import type { ComponentConfig, TemplateConfig } from '../types/index.js';
 import ora from 'ora';
 
-const TEMPLATE_DIR = path.join(path.dirname(fileURLToPath(import.meta.url)), '../templates');
+export const TEMPLATE_DIR = path.join(path.dirname(fileURLToPath(import.meta.url)), '../templates');
 
-const TEMPLATES: Record<string, Record<string, TemplateConfig[]>> = {
+export const TEMPLATES: Record<string, Record<string, TemplateConfig[]>> = {
   workflow: {
     node: [
       {
@@ -37,13 +37,13 @@ const TEMPLATES: Record<string, Record<string, TemplateConfig[]>> = {
   },
 };
 
-export async function setupTemplates(components: ComponentConfig): Promise<void> {
+export async function setupTemplates(components: ComponentConfig, templates: typeof TEMPLATES, destDir = process.cwd()): Promise<void> {
   const spinner = ora();
   spinner.start('Setting up project templates...');
   try {
     // Create package.json if it doesn't exist (for version tracking)
     spinner.start('Creating package.json...');
-    const pkgStatus = await setupPackageJson();
+    const pkgStatus = await setupPackageJson(destDir);
     if (pkgStatus === 'exists') {
       spinner.succeed('package.json already exists');
     } else {
@@ -52,18 +52,18 @@ export async function setupTemplates(components: ComponentConfig): Promise<void>
     // Process workflow templates
     if (components.workflow) {
       const language = components.language || 'node'; // Default to Node.js
-      const workflow = TEMPLATES.workflow[language];
+      const workflow = templates.workflow[language];
       spinner.start(`Setting up ${language}: ${workflow[0].destination}`);
-      await processTemplates(workflow);
+      await processTemplates(workflow, destDir);
       spinner.succeed(`${language} workflow configured successfully`);
     }
 
     // Process changelog templates
     if (components.changelog) {
       const language = components.language || 'node';
-      const changelog = TEMPLATES.changelog[language];
+      const changelog = templates.changelog[language];
       spinner.start(`Setting up ${language}: ${changelog[0].destination}`);
-      await processTemplates(changelog);
+      await processTemplates(changelog, destDir);
       spinner.succeed(`${language} changelog configured successfully`);
     }
     spinner.succeed('Templates configured successfully');
@@ -73,16 +73,16 @@ export async function setupTemplates(components: ComponentConfig): Promise<void>
   }
 }
 
-export async function setupPackageJson(): Promise<string> {
+export async function setupPackageJson(dir = process.cwd()): Promise<string> {
   try {
-    await fs.access('package.json');
+    await fs.access(path.join(dir, 'package.json'));
     return 'exists';
   } catch {
     await fs.writeFile(
-      'package.json',
+      path.join(dir, 'package.json'),
       JSON.stringify(
         {
-          name: path.basename(process.cwd()),
+          name: path.basename(dir),
           version: '0.1.0',
           private: true,
         },
@@ -94,12 +94,13 @@ export async function setupPackageJson(): Promise<string> {
   }
 }
 
-async function processTemplates(templates: TemplateConfig[]): Promise<void> {
+async function processTemplates(templates: TemplateConfig[], baseDestDir = process.cwd()): Promise<void> {
   for (const template of templates) {
     const sourcePath = path.join(TEMPLATE_DIR, template.source);
+    const destPath = path.join(baseDestDir, template.destination);
 
     // Ensure destination directory exists
-    const destDir = path.dirname(template.destination);
+    const destDir = path.dirname(destPath);
     await fs.mkdir(destDir, { recursive: true });
 
     // Read and transform template content
@@ -109,7 +110,7 @@ async function processTemplates(templates: TemplateConfig[]): Promise<void> {
     }
 
     // Write to destination
-    await fs.writeFile(template.destination, content);
+    await fs.writeFile(destPath, content);
   }
 }
 
