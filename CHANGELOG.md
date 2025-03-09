@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.3.2] - 2025-03-09
+
+* chore: remove automated patch release
+* chore: add automated patch releases
+* chore: release v0.3.1
+
 ## [0.3.1] - 2025-03-09
 
 * fix:  upload artifacts
