@@ -95,6 +95,11 @@ export async function initCommand(options: InitOptions): Promise<void> {
     try {
       await fs.access(path.join(installationDir, '.gitignore'));
       spinner.succeed('.gitignore already exists');
+      //TODO: add node_modules if it doesnt exist yet
+      const gitignore = await fs.readFile(path.join(installationDir, '.gitignore'), 'utf-8');
+      if (!gitignore.includes('node_modules/')) {
+        await fs.appendFile(path.join(installationDir, '.gitignore'), 'node_modules/\n');
+      }
     } catch {
       await fs.writeFile(path.join(installationDir, '.gitignore'), 'node_modules/\n.DS_Store\n');
       spinner.succeed('Created .gitignore');
