@@ -40,7 +40,16 @@ program
   .option('--branch <name>', 'Branch to create release from')
   .option('--config <path>', 'Path to config file')
   .action((options) => {
-    createCommand(options);
+    // Convert shorthand flags to bump type
+    let bumpType = options.bump;
+    if (options.major) bumpType = 'major';
+    if (options.minor) bumpType = 'minor';
+    if (options.patch) bumpType = 'patch';
+
+    createCommand({
+      ...options,
+      bump: bumpType,
+    });
   });
 
 // Error handling

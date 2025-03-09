@@ -17,7 +17,6 @@ describe('setupTemplates', () => {
     vi.mocked(fs.mkdir).mockResolvedValue(undefined);
     vi.mocked(fs.writeFile).mockResolvedValue(undefined);
     vi.mocked(fs.readFile).mockResolvedValue('{}');
-    vi.mocked(fs.access).mockRejectedValue(new Error('File not found'));
     vi.mocked(path.join).mockImplementation((...args) => args.join('/'));
     vi.mocked(path.dirname).mockImplementation((p) => p.split('/').slice(0, -1).join('/'));
     vi.mocked(fileURLToPath).mockReturnValue('/mock/path');
@@ -38,39 +37,6 @@ describe('setupTemplates', () => {
     await setupTemplates({ workflow: false, changelog: true, hooks: false });
 
     expect(fs.writeFile).toHaveBeenCalledWith('.versionrc', expect.any(String));
-    expect(fs.writeFile).toHaveBeenCalledWith('scripts/generate-changelog.js', expect.any(String));
-  });
-
-  it('should update package.json scripts when changelog is true', async () => {
-    const mockPackageJson = {
-      scripts: {
-        test: 'vitest',
-      },
-    };
-    vi.mocked(fs.readFile).mockResolvedValue(JSON.stringify(mockPackageJson));
-    vi.mocked(fs.access).mockResolvedValue(undefined);
-
-    await setupTemplates({ workflow: false, changelog: true, hooks: false });
-
-    expect(fs.writeFile).toHaveBeenCalledWith(
-      'package.json',
-      JSON.stringify(
-        {
-          scripts: {
-            test: 'vitest',
-            'generate-changelog': 'node scripts/generate-changelog.js',
-          },
-        },
-        null,
-        2
-      )
-    );
-  });
-
-  it('should skip package.json update if file does not exist', async () => {
-    await setupTemplates({ workflow: false, changelog: true, hooks: false });
-
-    expect(fs.writeFile).not.toHaveBeenCalledWith('package.json', expect.any(String));
   });
 
   it('should process both workflow and changelog templates when both are true', async () => {
@@ -81,7 +47,6 @@ describe('setupTemplates', () => {
 
     // Check changelog files
     expect(fs.writeFile).toHaveBeenCalledWith('.versionrc', expect.any(String));
-    expect(fs.writeFile).toHaveBeenCalledWith('scripts/generate-changelog.js', expect.any(String));
   });
 
   it('should throw error with message when setup fails', async () => {

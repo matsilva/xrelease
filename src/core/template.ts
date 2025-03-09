@@ -26,19 +26,11 @@ const TEMPLATES: Record<string, Record<string, TemplateConfig[]>> = {
         source: 'configs/versionrc.json',
         destination: '.versionrc',
       },
-      {
-        source: 'scripts/generate-changelog.js',
-        destination: 'scripts/generate-changelog.js',
-      },
     ],
     go: [
       {
         source: 'configs/versionrc.json',
         destination: '.versionrc',
-      },
-      {
-        source: 'scripts/generate-changelog.js',
-        destination: 'scripts/generate-changelog.js',
       },
     ],
   },
@@ -56,22 +48,6 @@ export async function setupTemplates(components: ComponentConfig): Promise<void>
     if (components.changelog) {
       const language = components.language || 'node';
       await processTemplates(TEMPLATES.changelog[language]);
-
-      // Update package.json with changelog scripts
-      const pkgPath = 'package.json';
-      const pkgExists = await fs
-        .access(pkgPath)
-        .then(() => true)
-        .catch(() => false);
-
-      if (pkgExists) {
-        const pkg = JSON.parse(await fs.readFile(pkgPath, 'utf-8'));
-        pkg.scripts = {
-          ...pkg.scripts,
-          'generate-changelog': 'node scripts/generate-changelog.js',
-        };
-        await fs.writeFile(pkgPath, JSON.stringify(pkg, null, 2));
-      }
     }
   } catch (error) {
     throw new Error(`Failed to setup templates: ${error instanceof Error ? error.message : 'Unknown error'}`);
