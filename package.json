@@ -17,7 +17,7 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "prepare": "husky",
-    "release": "npm run build:relink && xrelease create --ci",
+    "release": "npm run build:relink && xrelease create",
     "generate-changelog": "node scripts/generate-changelog.js"
   },
   "keywords": [

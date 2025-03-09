@@ -33,10 +33,12 @@ program
 program
   .command('create')
   .description('Create a new release')
-  .option('--ci', 'Run in CI mode (non-interactive)')
-  .option('--bump <type>', 'Version bump type (patch, minor, major)', 'patch')
-  .option('--branch <name>', 'Override the release branch (default: from config)')
-  .option('-c, --config <path>', 'Path to config file (default: .xrelease.yml)')
+  .option('-M, --major', 'Create major release')
+  .option('-m, --minor', 'Create minor release')
+  .option('-p, --patch', 'Create patch release')
+  .option('--bump <type>', 'Specify version bump type (major, minor, patch)')
+  .option('--branch <name>', 'Branch to create release from')
+  .option('--config <path>', 'Path to config file')
   .action((options) => {
     createCommand(options);
   });

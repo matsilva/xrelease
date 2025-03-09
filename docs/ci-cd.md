@@ -17,24 +17,17 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
       - run: npm install -g xrelease
-      - run: xrelease create --ci
+      - run: xrelease create
 ```
 
 ## CLI Options
-
-### --ci
-
-- Purpose: Runs in CI mode (non-interactive)
-- Skips: Prompts, confirmations
-- Fails: On any error
-- Example: `xrelease create --ci`
 
 ### --dry-run
 
 - Purpose: Test release process
 - Creates: Nothing
 - Shows: What would happen
-- Example: `xrelease create --ci --dry-run`
+- Example: `xrelease create --dry-run`
 
 ## CI Platform Examples
 
@@ -70,7 +63,7 @@ jobs:
 
       # Create release
       - name: Create Release
-        run: xrelease create --ci
+        run: xrelease create
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
@@ -89,7 +82,7 @@ release:
 
     # Create release
     - npm install -g xrelease
-    - xrelease create --ci
+    - xrelease create
   rules:
     - if: $CI_COMMIT_BRANCH == "main"
   variables:
@@ -117,7 +110,7 @@ pipeline {
         // Install and run xrelease
         sh '''
           npm install -g xrelease
-          xrelease create --ci
+          xrelease create
         '''
       }
     }
@@ -147,7 +140,7 @@ jobs:
           name: Create Release
           command: |
             npm install -g xrelease
-            xrelease create --ci
+            xrelease create
 
 workflows:
   version: 2

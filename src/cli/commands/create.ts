@@ -12,7 +12,6 @@ import { checkGitHubCLI, isGitHubCLIAuthenticated, createGitHubRelease } from '.
 import { glob } from 'glob';
 
 interface CreateOptions {
-  ci?: boolean;
   bump?: BumpType;
   branch?: string;
   config?: string;
@@ -138,10 +137,7 @@ export async function createCommand(options: CreateOptions): Promise<void> {
     console.log(chalk.green(`\n✨ Release v${newVersion} created successfully!`));
   } catch (error) {
     spinner.fail('Failed to create release');
-    console.error(chalk.red(`\nError: ${error instanceof Error ? error.message : 'Unknown error occurred'}`));
-    if (!options.ci) {
-      console.log('\nTry running with --ci flag for more detailed output');
-    }
+    console.error(chalk.red(`\nError: ${error instanceof Error ? error.message : 'Unknown error'}`));
     process.exit(1);
   }
 }
