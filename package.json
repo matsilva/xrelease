@@ -17,6 +17,7 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "prepare": "echo 'nothing to do'",
+    "prepublishOnly": "git pull && npm run build",
     "release:local": "npm run build:relink && xrelease create",
     "generate-changelog": "node scripts/generate-changelog.js"
   },
