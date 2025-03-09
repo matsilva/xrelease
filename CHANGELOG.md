@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.2.0] - 2025-03-09
+
+* chore: remove cruft
+* chore: remove dup
+* chore: update readme
+* docs: update usage
+* refactor: simplify release command and changelog template handling
+* refactor: simplify release command and remove --ci flag
+* refactor: template files
+* docs:  add legal and more blurbs
+* chore: remove unused type
+* fix: update GitHub Actions release workflows
+* chore: release v0.1.5
+
 ## [0.1.5] - 2025-03-08
 
 * chore: add npm install
