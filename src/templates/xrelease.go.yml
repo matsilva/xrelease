@@ -28,10 +28,6 @@ release:
 
   # Pre-release checks
   checks:
-    - type: lint
-      command: 'golangci-lint run'
-    - type: test
-      command: 'go test ./...'
     - type: build
       command: 'go build'
 
@@ -42,12 +38,11 @@ release:
     - type: github-release
       # Release assets configuration - Specify files to upload with the release
       # Supports glob patterns to match build artifacts
-      assets:
-        - 'dist/*-Darwin_arm64.tar.gz' # macOS ARM64 binaries
-        - 'dist/*-Windows_amd64.zip' # Windows x64 binaries (exe and dlls)
-    - type: custom
-      name: 'update-go-mod'
-      command: |
-        VERSION=$(node -p "require('./package.json').version")
-        go mod edit -module "$(go list -m)"/v${VERSION%%.*}
-        go mod tidy
+      # assets:
+      #   - 'dist/*-Darwin_arm64.tar.gz' # macOS ARM64 binaries
+      #   - 'dist/*-Windows_amd64.zip' # Windows x64 binaries (exe and dlls)
+    # run any custom commands here, which will run after the release is created
+    # - type: custom
+    #   name: 'go-mod-tidy'
+    #   command: |
+    #     go mod tidy
