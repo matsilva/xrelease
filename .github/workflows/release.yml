@@ -69,6 +69,6 @@ jobs:
       # 4. Create and push git tag vx.y.z
       # 5. Create GitHub release from the changelog
       - name: Create Release
-        run: npx xrelease create --bump ${{ inputs.version_bump }}
+        run: npx -y xrelease create --bump ${{ inputs.version_bump }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
