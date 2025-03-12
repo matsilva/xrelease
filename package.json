@@ -38,7 +38,7 @@
     "swift",
     "release-management"
   ],
-  "author": "Anand Kamat",
+  "author": "Mat Silva",
   "license": "MIT",
   "dependencies": {
     "chalk": "^5.3.0",
