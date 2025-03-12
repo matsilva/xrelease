@@ -30,10 +30,6 @@ describe('setupGitHooks', { timeout: 20000 }, () => {
       await expect(fs.access(path.join(TEST_DIR, '.husky/commit-msg'))).resolves.toBeUndefined();
       await expect(fs.access(path.join(TEST_DIR, 'commitlint.config.js'))).resolves.toBeUndefined();
 
-      // Verify package.json content
-      const pkgJson = JSON.parse(await fs.readFile(path.join(TEST_DIR, 'package.json'), 'utf-8'));
-      expect(pkgJson.scripts.prepare).toContain('husky');
-
       // Verify hook content
       const commitMessageHook = await fs.readFile(path.join(TEST_DIR, '.husky/commit-msg'), 'utf-8');
       expect(commitMessageHook).toBe('npx --no -- commitlint --edit $1');

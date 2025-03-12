@@ -80,17 +80,6 @@ export async function setupGitHooks(dir = process.cwd()): Promise<void> {
       await execa('npm', ['install', 'husky', '--save-dev'], { cwd: dir });
       await execa('npx', ['husky', 'init'], { cwd: dir });
       spinner.succeed('Initialized husky');
-
-      const pkgJson = JSON.parse(await fs.readFile(path.join(dir, 'package.json'), 'utf-8'));
-      if (!pkgJson.scripts?.prepare?.includes('husky')) {
-        spinner.start('Adding husky prepare script to package.json...');
-        pkgJson.scripts = {
-          ...pkgJson.scripts,
-          prepare: pkgJson.scripts?.prepare ? `${pkgJson.scripts.prepare} && npx husky init` : 'npx husky init',
-        };
-        await fs.writeFile(path.join(dir, 'package.json'), JSON.stringify(pkgJson, null, 2));
-        spinner.succeed('Added husky prepare script to package.json');
-      }
     }
 
     // Create hook files
