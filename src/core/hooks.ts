@@ -77,11 +77,10 @@ export async function setupGitHooks(dir = process.cwd()): Promise<void> {
 
       // Initialize husky
       spinner.start('Initializing husky...');
+      await execa('npm', ['install', 'husky', '--save-dev'], { cwd: dir });
       await execa('npx', ['husky', 'init'], { cwd: dir });
       spinner.succeed('Initialized husky');
 
-      // Add husky prepare script to package.json if it doesn't exist
-      //TODO: abstract this to a package.json helper
       const pkgJson = JSON.parse(await fs.readFile(path.join(dir, 'package.json'), 'utf-8'));
       if (!pkgJson.scripts?.prepare?.includes('husky')) {
         spinner.start('Adding husky prepare script to package.json...');
