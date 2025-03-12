@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.3.4] - 2025-03-12
+
+* chore: add npm install to node template
+* chore: update author
+* refactor: remove husky prepare script modification
+* fix: install husky as dev dep
+* chore: add `-y` flag to xrelease command in release workflows
+* chore: update release configuration template
+* chore: add prepublish cmd
+* chore: release v0.3.3
+
 ## [0.3.3] - 2025-03-09
 
 * chore: add test for mod path without version
