@@ -20,6 +20,8 @@ release:
 
   # Pre-release checks
   checks:
+    - type: install
+      command: 'npm install'
     - type: lint
       command: 'npm run lint'
     - type: test
