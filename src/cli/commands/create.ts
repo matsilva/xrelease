@@ -11,6 +11,8 @@ import { execa } from 'execa';
 import { checkGitHubCLI, isGitHubCLIAuthenticated, createGitHubRelease } from '../../core/release/gh-cli.js';
 import { glob } from 'glob';
 import { updateVersionInFile } from '../../core/template.js';
+import { runPreReleaseSteps } from '../../core/release/pre-release-steps.js';
+import { runPostReleaseSteps } from '../../core/release/post-release-steps.js';
 
 interface CreateOptions {
   bump?: BumpType;
@@ -35,7 +37,12 @@ export async function createCommand(options: CreateOptions): Promise<void> {
     await runPreReleaseChecks(options.config);
     spinner.succeed('Pre-release checks passed');
 
-    // 3. Bump version
+    // 3. Run pre-release steps
+    spinner.start('Running pre-release steps...');
+    await runPreReleaseSteps(options.config);
+    spinner.succeed('Pre-release steps passed');
+
+    // 4. Bump version
     spinner.start('Bumping version...');
     const newVersion = await bumpVersion(options.bump || config.release.defaultBump);
     spinner.succeed(`Version bumped to ${newVersion}`);
@@ -121,6 +128,7 @@ export async function createCommand(options: CreateOptions): Promise<void> {
             spinner.succeed('GitHub release created');
             break;
           case 'custom':
+          default:
             if (action.command) {
               try {
                 await execa(action.command, { shell: true });
@@ -129,13 +137,16 @@ export async function createCommand(options: CreateOptions): Promise<void> {
               }
             }
             break;
-          default:
-            console.warn(chalk.yellow(`Unknown action type: ${action.type}`));
         }
 
         spinner.succeed(`${actionName} completed`);
       }
     }
+
+    // 7. Run post-release steps
+    spinner.start('Running post-release steps...');
+    await runPostReleaseSteps(options.config);
+    spinner.succeed('Post-release steps passed');
 
     console.log(chalk.green(`\n✨ Release v${newVersion} created successfully!`));
   } catch (error) {

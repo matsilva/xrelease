@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { setupTemplates, updateVersionInFile } from '../template.js';
+import { setupTemplates, updateVersionInFile } from './template.js';
 import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { TEMPLATES } from '../template.js';
+import { TEMPLATES } from './template.js';
 
 const TEST_DIR = 'test-output/template-tests';
 
