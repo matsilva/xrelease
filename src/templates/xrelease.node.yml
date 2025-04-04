@@ -18,19 +18,27 @@ release:
     enabled: true
     template: conventional
 
-  # Pre-release checks
-  checks:
+  # Pre-release steps
+  pre:
     - type: install
       command: 'npm install'
+    - type: build
+      command: 'npm run build'
+
+  # Pre-release checks
+  checks:
     - type: lint
       command: 'npm run lint'
     - type: test
       command: 'npm test'
-    - type: build
-      command: 'npm run build'
 
   # Release actions actions
   actions:
     - type: git-tag
     - type: commit-push
     - type: github-release
+
+  # Post-release steps
+  # post:
+  #   - type: clean
+  #     command: 'npm run clean'

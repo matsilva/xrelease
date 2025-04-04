@@ -42,15 +42,6 @@ jobs:
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
 
-      # Run Go-specific checks
-      - name: Run Tests
-        run: go test ./...
-
-      - name: Run Linter
-        uses: golangci/golangci-lint-action@v3
-        with:
-          version: latest
-
       # xrelease will:
       # 1. Update version in package.json (source of truth)
       # 2. Update go.mod version based on major version
