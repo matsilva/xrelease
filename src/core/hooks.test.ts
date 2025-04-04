@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { setupGitHooks } from '../hooks.js';
+import { setupGitHooks } from './hooks.js';
 import fs from 'fs/promises';
 import path from 'path';
-import { setupTemplates } from '../template.js';
-import { TEMPLATES } from '../template.js';
+import { setupTemplates } from './template.js';
+import { TEMPLATES } from './template.js';
 
 const TEST_DIR = 'test-output/hooks-tests';
 

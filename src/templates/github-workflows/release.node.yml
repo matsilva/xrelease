@@ -15,16 +15,6 @@ on:
           - minor
           - major
 
-# For automatic trigger, use this instead:
-# on:
-#   push:
-#     branches: [main]
-#   # Or trigger from another workflow:
-#   # workflow_call:
-#   #   secrets:
-#   #     NPM_TOKEN:
-#   #       required: true
-
 jobs:
   release:
     runs-on: ubuntu-latest

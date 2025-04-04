@@ -15,14 +15,12 @@ export interface ChangelogConfig {
   template?: 'conventional' | 'simple';
 }
 
-export interface Check {
+export interface Step {
   type: string;
   command?: string;
 }
 
-export interface Action {
-  type: string;
-  command?: string;
+export interface Action extends Step {
   name?: string;
   assets?: string | string[];
 }
@@ -40,10 +38,16 @@ export interface ReleaseConfig {
   changelog?: ChangelogConfig;
 
   // Pre-release checks
-  checks?: Check[];
+  checks?: Step[];
+
+  // Pre-release steps
+  pre?: Step[];
 
   // Release actions actions
   actions?: Action[];
+
+  // Post-release steps
+  post?: Step[];
 }
 
 export interface Config {
