@@ -133,3 +133,4 @@ dist
 .testxrelease.yml
 
 test-output/
+.DS_Store
