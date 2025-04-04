@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.3.5] - 2025-04-04
+
+* chore: rewrite readme
+* chore: remove ds store
+* chore: release v0.3.4
+
 ## [0.3.4] - 2025-03-12
 
 * chore: add npm install to node template
