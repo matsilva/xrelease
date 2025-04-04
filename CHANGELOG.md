@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.4.0] - 2025-04-04
+
+* feat: add pre and post release steps to the create command (#2)
+* chore: release v0.3.5
+
 ## [0.3.5] - 2025-04-04
 
 * chore: rewrite readme
