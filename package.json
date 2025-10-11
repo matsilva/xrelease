@@ -9,16 +9,16 @@
   "type": "module",
   "scripts": {
     "build": "tsc && cp -r src/templates dist/templates",
-    "build:local:link": "npm run build && chmod +x dist/cli/index.js && npm link",
-    "build:local:relink": "npm unlink xrelease && npm run build:link",
+    "build:local:link": "bun run build && chmod +x dist/cli/index.js && bun link",
+    "build:local:relink": "bun unlink xrelease && bun run build:link",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "lint": "eslint .",
     "format": "prettier --write .",
     "prepare": "echo 'nothing to do'",
-    "prepublishOnly": "git pull && npm run build",
-    "release:local": "npm run build:relink && xrelease create",
+    "prepublishOnly": "git pull && bun run build",
+    "release:local": "bun run build:relink && xrelease create",
     "generate-changelog": "node scripts/generate-changelog.js"
   },
   "keywords": [
@@ -73,3 +73,4 @@
     "url": "git+https://github.com/matsilva/xrelease.git"
   }
 }
+
