@@ -48,7 +48,7 @@ const PACKAGE_MANAGER_WORKFLOW_COMMANDS: Record<
 };
 
 const NODE_SETUP_PATTERN =
-  /- name: Setup Node\.js\n\s+uses: actions\/setup-node@v4\n\s+with:\n\s+node-version: '22'\n\s+# node-version-file:.*\n\s+registry-url:.*$/m;
+  /- name: Setup Node\.js\n\s+uses: actions\/setup-node@v4\n\s+with:\n\s+node-version: ["']22["']\n\s+# node-version-file:.*\n\s+registry-url:.*$/m;
 
 /**
  * Applies package manager specific commands to workflow template content

@@ -43,91 +43,130 @@ describe("GitHub CLI utilities", () => {
 
   describe("createGitHubRelease", () => {
     it("should create a release with version only", async () => {
+      // First call checks if release exists (throws = doesn't exist)
+      vi.mocked(execa).mockRejectedValueOnce(new Error("release not found"));
+      // Second call creates the release
+      vi.mocked(execa).mockResolvedValueOnce({ stdout: "" } as any);
+
       await createGitHubRelease({ version: "1.0.0" });
-      expect(execa).toHaveBeenCalledWith("gh", ["release", "create", "v1.0.0"]);
-      expect(execa).toHaveBeenCalledTimes(1);
+
+      // First call: check if release exists
+      expect(execa).toHaveBeenNthCalledWith(1, "gh", [
+        "release",
+        "view",
+        "v1.0.0",
+      ]);
+      // Second call: create the release
+      expect(execa).toHaveBeenNthCalledWith(2, "gh", [
+        "release",
+        "create",
+        "v1.0.0",
+      ]);
+      expect(execa).toHaveBeenCalledTimes(2);
     });
 
     it("should create a release with notes", async () => {
+      // First call checks if release exists (throws = doesn't exist)
+      vi.mocked(execa).mockRejectedValueOnce(new Error("release not found"));
+      // Second call creates the release
+      vi.mocked(execa).mockResolvedValueOnce({ stdout: "" } as any);
+
       await createGitHubRelease({ version: "1.0.0", body: "Release notes" });
-      expect(execa).toHaveBeenCalledWith("gh", [
+
+      expect(execa).toHaveBeenNthCalledWith(2, "gh", [
         "release",
         "create",
         "v1.0.0",
         "--notes",
         "Release notes",
       ]);
-      expect(execa).toHaveBeenCalledTimes(1);
+      expect(execa).toHaveBeenCalledTimes(2);
     });
 
-    it("should create a release and upload assets", async () => {
+    it("should create a release with assets in one command", async () => {
+      // First call checks if release exists (throws = doesn't exist)
+      vi.mocked(execa).mockRejectedValueOnce(new Error("release not found"));
+      // Second call creates the release with assets
+      vi.mocked(execa).mockResolvedValueOnce({ stdout: "" } as any);
+
       await createGitHubRelease({
         version: "1.0.0",
         assets: ["dist/app.js", "dist/app.css"],
       });
 
-      // Verify create and upload calls
-      expect(execa).toHaveBeenCalledTimes(2);
-      expect(execa).toHaveBeenNthCalledWith(1, "gh", [
-        "release",
-        "create",
-        "v1.0.0",
-      ]);
+      // Assets are now included in the create command, not uploaded separately
       expect(execa).toHaveBeenNthCalledWith(2, "gh", [
         "release",
-        "upload",
+        "create",
         "v1.0.0",
         "dist/app.js",
         "dist/app.css",
       ]);
+      expect(execa).toHaveBeenCalledTimes(2);
     });
 
-    it("should create a release with notes and upload assets", async () => {
+    it("should create a release with notes and assets", async () => {
+      // First call checks if release exists (throws = doesn't exist)
+      vi.mocked(execa).mockRejectedValueOnce(new Error("release not found"));
+      // Second call creates the release
+      vi.mocked(execa).mockResolvedValueOnce({ stdout: "" } as any);
+
       await createGitHubRelease({
         version: "1.0.0",
         body: "Release notes",
         assets: ["dist/app.js"],
       });
 
-      // Verify create with notes and upload calls
-      expect(execa).toHaveBeenCalledTimes(2);
-      expect(execa).toHaveBeenNthCalledWith(1, "gh", [
+      expect(execa).toHaveBeenNthCalledWith(2, "gh", [
         "release",
         "create",
         "v1.0.0",
         "--notes",
         "Release notes",
+        "dist/app.js",
+      ]);
+      expect(execa).toHaveBeenCalledTimes(2);
+    });
+
+    it("should delete existing release before creating new one", async () => {
+      // First call: release exists
+      vi.mocked(execa).mockResolvedValueOnce({ stdout: "release info" } as any);
+      // Second call: delete release
+      vi.mocked(execa).mockResolvedValueOnce({ stdout: "" } as any);
+      // Third call: create release
+      vi.mocked(execa).mockResolvedValueOnce({ stdout: "" } as any);
+
+      await createGitHubRelease({ version: "1.0.0" });
+
+      expect(execa).toHaveBeenNthCalledWith(1, "gh", [
+        "release",
+        "view",
+        "v1.0.0",
       ]);
       expect(execa).toHaveBeenNthCalledWith(2, "gh", [
         "release",
-        "upload",
+        "delete",
         "v1.0.0",
-        "dist/app.js",
+        "--yes",
       ]);
+      expect(execa).toHaveBeenNthCalledWith(3, "gh", [
+        "release",
+        "create",
+        "v1.0.0",
+      ]);
+      expect(execa).toHaveBeenCalledTimes(3);
     });
 
     it("should handle release creation errors", async () => {
+      // First call: release doesn't exist
+      vi.mocked(execa).mockRejectedValueOnce(new Error("release not found"));
+      // Second call: create fails
       vi.mocked(execa).mockRejectedValueOnce(
         new Error("Failed to create release")
       );
+
       await expect(createGitHubRelease({ version: "1.0.0" })).rejects.toThrow(
         "Failed to create GitHub release: Failed to create release"
-      );
-    });
-
-    it("should handle asset upload errors", async () => {
-      // Mock successful release creation but failed upload
-      vi.mocked(execa)
-        .mockResolvedValueOnce({ stdout: "" } as any) // release create succeeds
-        .mockRejectedValueOnce(new Error("Failed to upload assets")); // upload fails
-
-      await expect(
-        createGitHubRelease({
-          version: "1.0.0",
-          assets: ["dist/app.js"],
-        })
-      ).rejects.toThrow(
-        "Failed to create GitHub release: Failed to upload assets"
       );
     });
   });
