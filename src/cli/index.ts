@@ -20,6 +20,7 @@ program
   .option('-l, --language <type>', 'Project language (node, go)', 'node')
   .option('-c, --config <path>', 'Desired path to config file', '.xrelease.yml')
   .option('-d, --dir <path>', 'Desired installation directory', process.cwd())
+  .option('-p, --package-manager <manager>', 'Preferred package manager (npm, pnpm, bun)', 'npm')
   .action((options) => {
     initCommand(options);
   });

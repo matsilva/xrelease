@@ -1,6 +1,7 @@
 import fs from 'fs/promises';
 import yaml from 'yaml';
 import path from 'path';
+import type { PackageManager } from '../types/index.js';
 
 export interface VersionConfig {
   files?: Array<{
@@ -53,10 +54,12 @@ export interface ReleaseConfig {
 export interface Config {
   version: number;
   release: ReleaseConfig;
+  packageManager?: PackageManager;
 }
 
 const DEFAULT_CONFIG: Config = {
   version: 1,
+  packageManager: 'npm',
   release: {
     branch: 'main',
     defaultBump: 'patch',
@@ -80,6 +83,7 @@ export async function readConfig(configPath?: string): Promise<Config> {
     // Validate and merge with defaults
     return {
       version: config.version || DEFAULT_CONFIG.version,
+      packageManager: (config.packageManager ?? DEFAULT_CONFIG.packageManager) as PackageManager,
       release: {
         ...DEFAULT_CONFIG.release,
         ...config.release,

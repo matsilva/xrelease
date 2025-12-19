@@ -20,6 +20,7 @@ Copy this into `.xrelease.yml` to get started:
 
 ```yaml
 version: 1
+packageManager: npm
 release:
   # Branch to create releases from
   branch: main
@@ -52,6 +53,14 @@ release:
 - Required: yes
 - Default: `1`
 - Purpose: Config file version
+
+### packageManager
+
+- Type: `string`
+- Required: no
+- Options: `npm` | `pnpm` | `bun`
+- Default: `npm`
+- Purpose: Determines which package manager xrelease-generated commands use
 
 ### release.branch
 

@@ -1,9 +1,18 @@
+export type PackageManager = 'npm' | 'pnpm' | 'bun';
+export const PACKAGE_MANAGERS: PackageManager[] = ['npm', 'pnpm', 'bun'];
+export function isPackageManager(value: unknown): value is PackageManager {
+  return typeof value === 'string' && (PACKAGE_MANAGERS as string[]).includes(value);
+}
+
 // CLI Options
 export interface InitOptions {
   yes?: boolean;
   language?: string;
   configPath?: string;
   installationDir?: string;
+  config?: string;
+  dir?: string;
+  packageManager?: PackageManager;
 }
 
 // Component Configuration
@@ -12,6 +21,7 @@ export interface ComponentConfig {
   changelog: boolean;
   hooks: boolean;
   language?: string;
+  packageManager?: PackageManager;
 }
 
 // Git Hook Configuration

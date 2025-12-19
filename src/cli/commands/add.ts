@@ -1,7 +1,10 @@
 import ora from 'ora';
 import chalk from 'chalk';
+import path from 'path';
 import { setupGitHooks } from '../../core/hooks.js';
 import { setupTemplates, TEMPLATES } from '../../core/template.js';
+import { readConfig } from '../../core/config.js';
+import { isPackageManager, type PackageManager } from '../../types/index.js';
 
 type Component = 'workflow' | 'changelog' | 'hooks';
 
@@ -24,7 +27,16 @@ export async function addCommand(component: Component, installationDir: string =
 
       case 'hooks':
         spinner.start('Setting up Git hooks...');
-        await setupGitHooks(installationDir);
+        let packageManager: PackageManager = 'npm';
+        try {
+          const config = await readConfig(path.join(installationDir, '.xrelease.yml'));
+          if (config.packageManager && isPackageManager(config.packageManager)) {
+            packageManager = config.packageManager;
+          }
+        } catch {
+          // Falling back to npm if config not found or invalid; hooks setup still proceeds
+        }
+        await setupGitHooks(installationDir, packageManager);
         spinner.succeed('Git hooks configured successfully');
         break;
 

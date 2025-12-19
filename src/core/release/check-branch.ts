@@ -1,6 +1,6 @@
 import { execa } from 'execa';
 import { readConfig } from '../config.js';
-import { minimatch } from 'minimatch';
+import minimatch from 'minimatch';
 
 export async function checkBranch(overrideBranch?: string, configPath?: string): Promise<void> {
   try {

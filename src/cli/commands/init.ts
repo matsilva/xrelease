@@ -7,21 +7,66 @@ import chalk from 'chalk';
 import { setupGitHooks } from '../../core/hooks.js';
 
 import { setupTemplates, TEMPLATES } from '../../core/template.js';
-import type { InitOptions } from '../../types/index.js';
+import { PACKAGE_MANAGERS, isPackageManager, type InitOptions, type PackageManager } from '../../types/index.js';
+
+const PACKAGE_MANAGER_COMMANDS: Record<PackageManager, { install: string; build: string; lint: string; test: string }> = {
+  npm: {
+    install: 'npm install',
+    build: 'npm run build',
+    lint: 'npm run lint',
+    test: 'npm test',
+  },
+  pnpm: {
+    install: 'pnpm install',
+    build: 'pnpm run build',
+    lint: 'pnpm run lint',
+    test: 'pnpm run test',
+  },
+  bun: {
+    install: 'bun install',
+    build: 'bun run build',
+    lint: 'bun run lint',
+    test: 'bun run test',
+  },
+};
+
+function applyPackageManagerToConfig(template: string, packageManager: PackageManager): string {
+  const commands = PACKAGE_MANAGER_COMMANDS[packageManager];
+  let content = template;
+
+  if (!/packageManager:\s+/u.test(content)) {
+    content = content.replace('version: 1\n', `version: 1\npackageManager: ${packageManager}\n`);
+  }
+
+  content = content.replace(/npm install/g, commands.install);
+  content = content.replace(/npm run build/g, commands.build);
+  content = content.replace(/npm run lint/g, commands.lint);
+  content = content.replace(/npm test/g, commands.test);
+
+  return content;
+}
 
 export async function initCommand(options: InitOptions): Promise<void> {
   const spinner = ora();
-  const configFile = options.configPath || (process.env.NODE_ENV === 'test' ? '.testxrelease.yml' : '.xrelease.yml');
-  const installationDir = options.installationDir || process.cwd();
+  const configFile = options.configPath || options.config || (process.env.NODE_ENV === 'test' ? '.testxrelease.yml' : '.xrelease.yml');
+  const installationDir = options.installationDir || options.dir || process.cwd();
+
+  const providedPackageManager = options.packageManager;
+  let packageManager: PackageManager = isPackageManager(providedPackageManager) ? providedPackageManager : 'npm';
+  if (providedPackageManager && !isPackageManager(providedPackageManager)) {
+    console.warn(chalk.yellow(`Unknown package manager '${providedPackageManager}'. Falling back to npm.`));
+  }
+
+  let language = options.language || 'node';
+  let components = {
+    workflow: true,
+    changelog: true,
+    hooks: true,
+    language,
+    packageManager,
+  };
 
   try {
-    let components = {
-      workflow: true,
-      changelog: true,
-      hooks: true,
-      language: options.language || 'node',
-    };
-
     if (!options.yes) {
       const answers = await inquirer.prompt([
         {
@@ -35,6 +80,13 @@ export async function initCommand(options: InitOptions): Promise<void> {
           default: options.language || 'node',
         },
         {
+          type: 'list',
+          name: 'packageManager',
+          message: 'Select your package manager:',
+          choices: PACKAGE_MANAGERS.map((pm) => ({ name: pm, value: pm })),
+          default: packageManager,
+        },
+        {
           type: 'checkbox',
           name: 'components',
           message: 'Select components to initialize:',
@@ -46,11 +98,15 @@ export async function initCommand(options: InitOptions): Promise<void> {
         },
       ]);
 
+      language = answers.language;
+      packageManager = answers.packageManager;
+
       components = {
         workflow: answers.components.includes('workflow'),
         changelog: answers.components.includes('changelog'),
         hooks: answers.components.includes('hooks'),
-        language: answers.language,
+        language,
+        packageManager,
       };
     }
 
@@ -60,7 +116,7 @@ export async function initCommand(options: InitOptions): Promise<void> {
     // Setup Git hooks if selected
     if (components.hooks) {
       spinner.start('Setting up Git hooks...');
-      await setupGitHooks(options.installationDir);
+      await setupGitHooks(installationDir, packageManager);
       spinner.succeed('Git hooks configured successfully');
     }
 
@@ -71,7 +127,8 @@ export async function initCommand(options: InitOptions): Promise<void> {
     // Create config file
     spinner.start(`Creating ${configFile}...`);
     // Read template
-    const template = await fs.readFile(templatePath, 'utf-8');
+    let template = await fs.readFile(templatePath, 'utf-8');
+    template = applyPackageManagerToConfig(template, packageManager);
 
     try {
       await fs.access(configFile);

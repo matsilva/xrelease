@@ -1,20 +1,54 @@
 import { execa } from 'execa';
 import fs from 'fs/promises';
 import path from 'path';
-import { GitHookConfig } from '../types/index.js';
+import { GitHookConfig, type PackageManager } from '../types/index.js';
 import ora from 'ora';
 
-const DEFAULT_HOOKS: GitHookConfig[] = [
-  {
-    name: 'commit-msg',
-    command: 'npx --no -- commitlint --edit $1',
+const PACKAGE_MANAGER_COMMANDS: Record<PackageManager, {
+  huskyInstall: { command: string; args: string[] };
+  huskyInit: { command: string; args: string[] };
+  commitlintInstall: { command: string; args: string[] };
+  commitHook: string;
+}> = {
+  npm: {
+    huskyInstall: { command: 'npm', args: ['install', 'husky', '--save-dev'] },
+    huskyInit: { command: 'npx', args: ['husky', 'init'] },
+    commitlintInstall: {
+      command: 'npm',
+      args: ['install', '--save-dev', '@commitlint/cli', '@commitlint/config-conventional'],
+    },
+    commitHook: 'npx --no -- commitlint --edit $1',
   },
-  //TODO: allow users to configure pre-commit hook
-  // {
-  //   name: 'pre-commit',
-  //   command: 'npm run lint && npm test',
-  // },
-];
+  pnpm: {
+    huskyInstall: { command: 'pnpm', args: ['add', '-D', 'husky'] },
+    huskyInit: { command: 'pnpm', args: ['exec', 'husky', 'init'] },
+    commitlintInstall: {
+      command: 'pnpm',
+      args: ['add', '-D', '@commitlint/cli', '@commitlint/config-conventional'],
+    },
+    commitHook: 'pnpm exec commitlint --edit $1',
+  },
+  bun: {
+    huskyInstall: { command: 'bun', args: ['add', '-d', 'husky'] },
+    huskyInit: { command: 'bunx', args: ['husky', 'init'] },
+    commitlintInstall: {
+      command: 'bun',
+      args: ['add', '-d', '@commitlint/cli', '@commitlint/config-conventional'],
+    },
+    commitHook: 'bunx commitlint --edit $1',
+  },
+};
+
+function getDefaultHooks(packageManager: PackageManager): GitHookConfig[] {
+  const { commitHook } = PACKAGE_MANAGER_COMMANDS[packageManager];
+  return [
+    {
+      name: 'commit-msg',
+      command: commitHook,
+    },
+    //TODO: allow users to configure pre-commit hook
+  ];
+}
 
 export async function detectHuskyConfig(dir = process.cwd()): Promise<boolean> {
   try {
@@ -62,12 +96,13 @@ export async function detectCommitlintConfig(dir = process.cwd()): Promise<boole
   }
 }
 
-export async function setupGitHooks(dir = process.cwd()): Promise<void> {
+export async function setupGitHooks(dir = process.cwd(), packageManager: PackageManager = 'npm'): Promise<void> {
   const spinner = ora();
   try {
     spinner.start('Setting up Git hooks...');
     const hasHusky = await detectHuskyConfig(dir);
     const hasCommitlint = await detectCommitlintConfig(dir);
+    const pmCommands = PACKAGE_MANAGER_COMMANDS[packageManager];
 
     if (!hasHusky) {
       // Ensure .husky directory exists
@@ -77,13 +112,13 @@ export async function setupGitHooks(dir = process.cwd()): Promise<void> {
 
       // Initialize husky
       spinner.start('Initializing husky...');
-      await execa('npm', ['install', 'husky', '--save-dev'], { cwd: dir });
-      await execa('npx', ['husky', 'init'], { cwd: dir });
+      await execa(pmCommands.huskyInstall.command, pmCommands.huskyInstall.args, { cwd: dir });
+      await execa(pmCommands.huskyInit.command, pmCommands.huskyInit.args, { cwd: dir });
       spinner.succeed('Initialized husky');
     }
 
     // Create hook files
-    for (const hook of DEFAULT_HOOKS) {
+    for (const hook of getDefaultHooks(packageManager)) {
       const hookPath = path.join(dir, '.husky', hook.name);
       spinner.start(`Creating ${hook.name} hook...`);
       // Skip commit-msg hook if commitlint is already configured
@@ -108,7 +143,7 @@ export async function setupGitHooks(dir = process.cwd()): Promise<void> {
 
         spinner.start('Installing commitlint dependencies...');
         // Install commitlint dependencies
-        await execa('npm', ['install', '--save-dev', '@commitlint/cli', '@commitlint/config-conventional'], { cwd: dir });
+        await execa(pmCommands.commitlintInstall.command, pmCommands.commitlintInstall.args, { cwd: dir });
         spinner.succeed('Installed commitlint dependencies');
       }
     }

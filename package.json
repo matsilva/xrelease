@@ -54,6 +54,7 @@
     "@commitlint/cli": "^19.8.0",
     "@commitlint/config-conventional": "^19.8.0",
     "@types/inquirer": "^9.0.7",
+    "@types/minimatch": "^5.1.2",
     "@types/node": "^20.11.24",
     "@types/semver": "^7.5.8",
     "@typescript-eslint/eslint-plugin": "^7.1.1",
@@ -73,4 +74,3 @@
     "url": "git+https://github.com/matsilva/xrelease.git"
   }
 }
-
