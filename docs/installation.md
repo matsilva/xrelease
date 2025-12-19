@@ -7,6 +7,8 @@
 
 ## Installation Options
 
+> xrelease works with npm, pnpm, and bun. The examples below use npm commands — feel free to swap in your preferred package manager.
+
 ### Option A: From npm registry (recommended)
 
 ```bash

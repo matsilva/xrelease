@@ -11,13 +11,13 @@ release:
     files:
       # go.mod - Updates the module declaration while preserving the full import path
       # Example: "module github.com/user/project" -> "module github.com/user/project"
-      - path: 'go.mod'
+      - path: "go.mod"
         pattern: "^module\\s+([^\\s]+)" # Captures the full module path after "module "
-        template: 'module ${1}' # Keeps the original module path unchanged
+        template: "module ${1}" # Keeps the original module path unchanged
 
       # package.json - Updates the version field with the new version
       # Example: "version": "1.0.0" -> "version": "1.1.0"
-      - path: 'package.json'
+      - path: "package.json"
         pattern: '"version":\\s*"([^"]+)"' # Matches the version field value
         template: '"version": "${version}"' # Replaces with new version from release
 
@@ -29,7 +29,7 @@ release:
   # Pre-release steps
   pre:
     - type: build
-      command: 'go build'
+      command: "go build"
 
   # Release actions actions
   actions:

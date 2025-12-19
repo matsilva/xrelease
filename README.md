@@ -36,6 +36,8 @@ npm install -g xrelease
 xrelease init
 ```
 
+During initialization you'll be prompted to pick a package manager (npm, pnpm, or bun) so generated workflows run with your preferred tool.
+
 3. Create a release
 
 ```bash
@@ -63,6 +65,7 @@ Sets up automated releases for your project.
 ```bash
 -y, --yes              # Skip prompts and use defaults
 -l, --language <type>  # Project language (node, go)
+-p, --package-manager <manager>  # Preferred package manager (npm, pnpm, bun)
 ```
 
 ### `xrelease create`

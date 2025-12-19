@@ -9,16 +9,20 @@
   "type": "module",
   "scripts": {
     "build": "tsc && cp -r src/templates dist/templates",
-    "build:local:link": "npm run build && chmod +x dist/cli/index.js && npm link",
-    "build:local:relink": "npm unlink xrelease && npm run build:link",
+    "build:local:link": "bun run build && chmod +x dist/cli/index.js && bun link",
+    "build:local:relink": "bun unlink xrelease && bun run build:link",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "lint": "eslint .",
-    "format": "prettier --write .",
-    "prepare": "echo 'nothing to do'",
-    "prepublishOnly": "git pull && npm run build",
-    "release:local": "npm run build:relink && xrelease create",
+    "prepare": "husky",
+    "typecheck": "tsc --noEmit",
+    "lint": "ultracite check",
+    "lint:fix": "ultracite fix",
+    "format": "ultracite fix",
+    "check": "ultracite check && tsc --noEmit",
+    "doctor": "ultracite doctor",
+    "prepublishOnly": "git pull && bun run build",
+    "release:local": "bun run build:relink && xrelease create",
     "generate-changelog": "node scripts/generate-changelog.js"
   },
   "keywords": [
@@ -51,18 +55,18 @@
     "yaml": "^2.4.0"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.3.10",
     "@commitlint/cli": "^19.8.0",
     "@commitlint/config-conventional": "^19.8.0",
     "@types/inquirer": "^9.0.7",
+    "@types/minimatch": "^5.1.2",
     "@types/node": "^20.11.24",
     "@types/semver": "^7.5.8",
-    "@typescript-eslint/eslint-plugin": "^7.1.1",
-    "@typescript-eslint/parser": "^7.1.1",
     "@vitest/coverage-v8": "^1.3.1",
-    "eslint": "^8.57.0",
-    "husky": "^9.0.11",
-    "prettier": "^3.2.5",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
     "typescript": "^5.3.3",
+    "ultracite": "^6.4.2",
     "vitest": "^1.3.1"
   },
   "engines": {
@@ -71,5 +75,10 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/matsilva/xrelease.git"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx,json,jsonc,css,scss,md,mdx}": [
+      "npx ultracite fix"
+    ]
   }
 }

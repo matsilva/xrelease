@@ -20,6 +20,7 @@ Copy this into `.xrelease.yml` to get started:
 
 ```yaml
 version: 1
+packageManager: npm
 release:
   # Branch to create releases from
   branch: main
@@ -52,6 +53,14 @@ release:
 - Required: yes
 - Default: `1`
 - Purpose: Config file version
+
+### packageManager
+
+- Type: `string`
+- Required: no
+- Options: `npm` | `pnpm` | `bun`
+- Default: `npm`
+- Purpose: Determines which package manager xrelease-generated commands use
 
 ### release.branch
 
@@ -119,21 +128,21 @@ release:
   defaultBump: patch
   version:
     files:
-      - path: 'pyproject.toml'
+      - path: "pyproject.toml"
         pattern: "version\\s*=\\s*\"(?<version>[^\"]+)\""
         template: 'version = "${version}"'
   checks:
     - type: lint
-      command: 'poetry run flake8'
+      command: "poetry run flake8"
     - type: test
-      command: 'poetry run pytest'
+      command: "poetry run pytest"
     - type: build
-      command: 'poetry build'
+      command: "poetry build"
   actions:
     - type: git-tag
     - type: github-release
     - type: custom
-      command: 'poetry publish'
+      command: "poetry publish"
 ```
 
 ### Scala (sbt)
@@ -145,21 +154,21 @@ release:
   defaultBump: minor # Scala often uses minor for features
   version:
     files:
-      - path: 'build.sbt'
+      - path: "build.sbt"
         pattern: "version\\s*:=\\s*\"(?<version>[^\"]+)\""
         template: 'version := "${version}"'
   checks:
     - type: lint
-      command: 'sbt scalafmtCheckAll'
+      command: "sbt scalafmtCheckAll"
     - type: test
-      command: 'sbt test'
+      command: "sbt test"
     - type: build
-      command: 'sbt package'
+      command: "sbt package"
   actions:
     - type: git-tag
     - type: github-release
     - type: custom
-      command: 'sbt publish'
+      command: "sbt publish"
 ```
 
 ### Go
@@ -171,21 +180,21 @@ release:
   defaultBump: patch
   version:
     files:
-      - path: 'go.mod'
+      - path: "go.mod"
         pattern: "module\\s+(?<module>[^\\s]+)\\s+(?<version>v\\d+)"
-        template: 'module ${module} ${version}'
+        template: "module ${module} ${version}"
   checks:
     - type: lint
-      command: 'golangci-lint run'
+      command: "golangci-lint run"
     - type: test
-      command: 'go test ./...'
+      command: "go test ./..."
     - type: build
-      command: 'go build'
+      command: "go build"
   actions:
     - type: git-tag
     - type: github-release
     - type: custom
-      name: 'update-go-mod'
+      name: "update-go-mod"
       command: |
         VERSION=$(node -p "require('./package.json').version")
         go mod edit -module "$(go list -m)"/v${VERSION%%.*}
@@ -201,21 +210,21 @@ release:
   defaultBump: minor
   version:
     files:
-      - path: 'Package.swift'
+      - path: "Package.swift"
         pattern: "version:\\s*\"(?<version>[^\"]+)\""
         template: 'version: "${version}"'
   checks:
     - type: lint
-      command: 'swiftlint'
+      command: "swiftlint"
     - type: test
-      command: 'swift test'
+      command: "swift test"
     - type: build
-      command: 'swift build'
+      command: "swift build"
   actions:
     - type: git-tag
     - type: github-release
     - type: custom
-      command: 'pod trunk push' # If using CocoaPods
+      command: "pod trunk push" # If using CocoaPods
 ```
 
 ### Rust (Cargo)
@@ -227,19 +236,19 @@ release:
   defaultBump: patch
   version:
     files:
-      - path: 'Cargo.toml'
+      - path: "Cargo.toml"
         pattern: "version\\s*=\\s*\"(?<version>[^\"]+)\""
         template: 'version = "${version}"'
   checks:
     - type: lint
-      command: 'cargo clippy'
+      command: "cargo clippy"
     - type: test
-      command: 'cargo test'
+      command: "cargo test"
     - type: build
-      command: 'cargo build --release'
+      command: "cargo build --release"
   actions:
     - type: git-tag
     - type: github-release
     - type: custom
-      command: 'cargo publish'
+      command: "cargo publish"
 ```

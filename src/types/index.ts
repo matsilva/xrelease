@@ -1,9 +1,20 @@
+export type PackageManager = "npm" | "pnpm" | "bun";
+export const PACKAGE_MANAGERS: PackageManager[] = ["npm", "pnpm", "bun"];
+export function isPackageManager(value: unknown): value is PackageManager {
+  return (
+    typeof value === "string" && (PACKAGE_MANAGERS as string[]).includes(value)
+  );
+}
+
 // CLI Options
 export interface InitOptions {
   yes?: boolean;
   language?: string;
   configPath?: string;
   installationDir?: string;
+  config?: string;
+  dir?: string;
+  packageManager?: PackageManager;
 }
 
 // Component Configuration
@@ -12,6 +23,7 @@ export interface ComponentConfig {
   changelog: boolean;
   hooks: boolean;
   language?: string;
+  packageManager?: PackageManager;
 }
 
 // Git Hook Configuration
@@ -31,26 +43,26 @@ export interface TemplateConfig {
 export class ToolkitError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = 'ToolkitError';
+    this.name = "ToolkitError";
   }
 }
 
 export class ValidationError extends ToolkitError {
   constructor(message: string) {
     super(message);
-    this.name = 'ValidationError';
+    this.name = "ValidationError";
   }
 }
 
 export class ConfigurationError extends ToolkitError {
   constructor(message: string) {
     super(message);
-    this.name = 'ConfigurationError';
+    this.name = "ConfigurationError";
   }
 }
 
 export interface AddOptions {
-  component: 'workflow' | 'changelog' | 'hooks';
+  component: "workflow" | "changelog" | "hooks";
 }
 
 export interface TemplateOptions {

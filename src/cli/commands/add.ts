@@ -1,46 +1,81 @@
-import ora from 'ora';
-import chalk from 'chalk';
-import { setupGitHooks } from '../../core/hooks.js';
-import { setupTemplates, TEMPLATES } from '../../core/template.js';
+import path from "node:path";
+import chalk from "chalk";
+import ora from "ora";
+import { readConfig } from "../../core/config.js";
+import { setupGitHooks } from "../../core/hooks.js";
+import { setupTemplates, TEMPLATES } from "../../core/template.js";
+import { isPackageManager, type PackageManager } from "../../types/index.js";
 
-type Component = 'workflow' | 'changelog' | 'hooks';
+type Component = "workflow" | "changelog" | "hooks";
 
-export async function addCommand(component: Component, installationDir: string = process.cwd()): Promise<void> {
+export async function addCommand(
+  component: Component,
+  installationDir: string = process.cwd()
+): Promise<void> {
   const spinner = ora();
 
   try {
     switch (component) {
-      case 'workflow':
-        spinner.start('Adding GitHub Actions workflow...');
-        await setupTemplates({ workflow: true, changelog: false, hooks: false }, TEMPLATES, installationDir);
-        spinner.succeed('GitHub Actions workflow added successfully');
+      case "workflow":
+        spinner.start("Adding GitHub Actions workflow...");
+        await setupTemplates(
+          { workflow: true, changelog: false, hooks: false },
+          TEMPLATES,
+          installationDir
+        );
+        spinner.succeed("GitHub Actions workflow added successfully");
         break;
 
-      case 'changelog':
-        spinner.start('Adding changelog configuration...');
-        await setupTemplates({ workflow: false, changelog: true, hooks: false }, TEMPLATES, installationDir);
-        spinner.succeed('Changelog configuration added successfully');
+      case "changelog":
+        spinner.start("Adding changelog configuration...");
+        await setupTemplates(
+          { workflow: false, changelog: true, hooks: false },
+          TEMPLATES,
+          installationDir
+        );
+        spinner.succeed("Changelog configuration added successfully");
         break;
 
-      case 'hooks':
-        spinner.start('Setting up Git hooks...');
-        await setupGitHooks(installationDir);
-        spinner.succeed('Git hooks configured successfully');
+      case "hooks": {
+        spinner.start("Setting up Git hooks...");
+        let packageManager: PackageManager = "npm";
+        try {
+          const config = await readConfig(
+            path.join(installationDir, ".xrelease.yml")
+          );
+          if (
+            config.packageManager &&
+            isPackageManager(config.packageManager)
+          ) {
+            packageManager = config.packageManager;
+          }
+        } catch {
+          // Falling back to npm if config not found or invalid; hooks setup still proceeds
+        }
+        await setupGitHooks(installationDir, packageManager);
+        spinner.succeed("Git hooks configured successfully");
         break;
+      }
 
       default:
         console.error(chalk.red(`Invalid component: ${component}`));
-        console.log('Available components:');
-        console.log('  - workflow: GitHub Actions release workflow');
-        console.log('  - changelog: Changelog generation setup');
-        console.log('  - hooks: Git hooks configuration');
+        console.log("Available components:");
+        console.log("  - workflow: GitHub Actions release workflow");
+        console.log("  - changelog: Changelog generation setup");
+        console.log("  - hooks: Git hooks configuration");
         process.exit(1);
     }
 
-    console.log(chalk.green(`\n✨ Component '${component}' added successfully!`));
+    console.log(
+      chalk.green(`\n✨ Component '${component}' added successfully!`)
+    );
   } catch (error) {
     spinner.fail(`Failed to add component '${component}'`);
-    console.error(chalk.red(`\nError: ${error instanceof Error ? error.message : 'Unknown error occurred'}`));
+    console.error(
+      chalk.red(
+        `\nError: ${error instanceof Error ? error.message : "Unknown error occurred"}`
+      )
+    );
     process.exit(1);
   }
 }

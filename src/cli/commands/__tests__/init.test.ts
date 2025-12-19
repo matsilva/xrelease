@@ -1,17 +1,18 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { initCommand } from '../init.js';
-import { setupTemplates, TEMPLATES } from '../../../core/template.js';
-import { setupGitHooks } from '../../../core/hooks.js';
-import inquirer from 'inquirer';
-import fs from 'fs/promises';
+import fs from "node:fs/promises";
+import inquirer from "inquirer";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { setupGitHooks } from "../../../core/hooks.js";
+import { setupTemplates, TEMPLATES } from "../../../core/template.js";
+import { initCommand } from "../init.js";
+
 // Mock dependencies
-vi.mock('../../../core/template.js');
-vi.mock('../../../core/hooks.js');
-vi.mock('inquirer');
+vi.mock("../../../core/template.js");
+vi.mock("../../../core/hooks.js");
+vi.mock("inquirer");
 
-const TEST_DIR = 'test-output/init-tests';
+const TEST_DIR = "test-output/init-tests";
 
-describe('initCommand', () => {
+describe("initCommand", () => {
   beforeEach(async () => {
     await fs.rm(TEST_DIR, { recursive: true, force: true });
     vi.resetAllMocks();
@@ -20,7 +21,7 @@ describe('initCommand', () => {
     await fs.mkdir(TEST_DIR, { recursive: true });
   });
 
-  it('should call setup functions with correct args when using --yes flag', async () => {
+  it("should call setup functions with correct args when using --yes flag", async () => {
     await initCommand({ yes: true, installationDir: TEST_DIR });
 
     // Verify setupTemplates was called with correct args
@@ -29,20 +30,22 @@ describe('initCommand', () => {
         workflow: true,
         changelog: true,
         hooks: true,
-        language: 'node',
+        language: "node",
+        packageManager: "npm",
       },
       TEMPLATES,
       TEST_DIR
     );
 
     // Verify setupGitHooks was called with correct directory
-    expect(setupGitHooks).toHaveBeenCalledWith(TEST_DIR);
+    expect(setupGitHooks).toHaveBeenCalledWith(TEST_DIR, "npm");
   });
 
-  it('should call setup functions with correct args when using interactive mode', async () => {
+  it("should call setup functions with correct args when using interactive mode", async () => {
     vi.mocked(inquirer.prompt).mockResolvedValue({
-      language: 'go',
-      components: ['workflow', 'changelog'], // Explicitly not including hooks
+      language: "go",
+      packageManager: "pnpm",
+      components: ["workflow", "changelog"], // Explicitly not including hooks
     });
 
     await initCommand({ yes: false, installationDir: TEST_DIR });
@@ -53,7 +56,8 @@ describe('initCommand', () => {
         workflow: true,
         changelog: true,
         hooks: false,
-        language: 'go',
+        language: "go",
+        packageManager: "pnpm",
       },
       TEMPLATES,
       TEST_DIR
@@ -63,18 +67,65 @@ describe('initCommand', () => {
     expect(setupGitHooks).not.toHaveBeenCalled();
   });
 
-  it('should respect CLI language option', async () => {
-    await initCommand({ yes: true, installationDir: TEST_DIR, language: 'go' });
+  it("should respect CLI language option", async () => {
+    await initCommand({ yes: true, installationDir: TEST_DIR, language: "go" });
 
     expect(setupTemplates).toHaveBeenCalledWith(
       {
         workflow: true,
         changelog: true,
         hooks: true,
-        language: 'go',
+        language: "go",
+        packageManager: "npm",
       },
       TEMPLATES,
       TEST_DIR
     );
+  });
+
+  it("should respect CLI packageManager option with bun", async () => {
+    await initCommand({
+      yes: true,
+      installationDir: TEST_DIR,
+      packageManager: "bun",
+    });
+
+    expect(setupTemplates).toHaveBeenCalledWith(
+      {
+        workflow: true,
+        changelog: true,
+        hooks: true,
+        language: "node",
+        packageManager: "bun",
+      },
+      TEMPLATES,
+      TEST_DIR
+    );
+
+    expect(setupGitHooks).toHaveBeenCalledWith(TEST_DIR, "bun");
+  });
+
+  it("should use bun package manager from interactive mode", async () => {
+    vi.mocked(inquirer.prompt).mockResolvedValue({
+      language: "node",
+      packageManager: "bun",
+      components: ["workflow", "changelog", "hooks"],
+    });
+
+    await initCommand({ yes: false, installationDir: TEST_DIR });
+
+    expect(setupTemplates).toHaveBeenCalledWith(
+      {
+        workflow: true,
+        changelog: true,
+        hooks: true,
+        language: "node",
+        packageManager: "bun",
+      },
+      TEMPLATES,
+      TEST_DIR
+    );
+
+    expect(setupGitHooks).toHaveBeenCalledWith(TEST_DIR, "bun");
   });
 });

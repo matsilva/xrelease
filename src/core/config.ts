@@ -1,6 +1,7 @@
-import fs from 'fs/promises';
-import yaml from 'yaml';
-import path from 'path';
+import fs from "node:fs/promises";
+import path from "node:path";
+import yaml from "yaml";
+import type { PackageManager } from "../types/index.js";
 
 export interface VersionConfig {
   files?: Array<{
@@ -12,7 +13,7 @@ export interface VersionConfig {
 
 export interface ChangelogConfig {
   enabled?: boolean;
-  template?: 'conventional' | 'simple';
+  template?: "conventional" | "simple";
 }
 
 export interface Step {
@@ -31,7 +32,7 @@ export interface ReleaseConfig {
   branches?: string[];
 
   // Version configuration
-  defaultBump?: 'major' | 'minor' | 'patch';
+  defaultBump?: "major" | "minor" | "patch";
   version?: VersionConfig;
 
   // Changelog configuration
@@ -53,40 +54,46 @@ export interface ReleaseConfig {
 export interface Config {
   version: number;
   release: ReleaseConfig;
+  packageManager?: PackageManager;
 }
 
 const DEFAULT_CONFIG: Config = {
   version: 1,
+  packageManager: "npm",
   release: {
-    branch: 'main',
-    defaultBump: 'patch',
+    branch: "main",
+    defaultBump: "patch",
     changelog: {
       enabled: true,
-      template: 'conventional',
+      template: "conventional",
     },
   },
 };
 
-const DEFAULT_CONFIG_PATH = '.xrelease.yml';
+const DEFAULT_CONFIG_PATH = ".xrelease.yml";
 
 export async function readConfig(configPath?: string): Promise<Config> {
   try {
     // Resolve config path
-    const resolvedPath = configPath ? path.resolve(configPath) : path.resolve(DEFAULT_CONFIG_PATH);
+    const resolvedPath = configPath
+      ? path.resolve(configPath)
+      : path.resolve(DEFAULT_CONFIG_PATH);
 
-    const configFile = await fs.readFile(resolvedPath, 'utf-8');
+    const configFile = await fs.readFile(resolvedPath, "utf-8");
     const config = yaml.parse(configFile) as Config;
 
     // Validate and merge with defaults
     return {
       version: config.version || DEFAULT_CONFIG.version,
+      packageManager: (config.packageManager ??
+        DEFAULT_CONFIG.packageManager) as PackageManager,
       release: {
         ...DEFAULT_CONFIG.release,
         ...config.release,
       },
     };
   } catch (error) {
-    if (error instanceof Error && error.message.includes('ENOENT')) {
+    if (error instanceof Error && error.message.includes("ENOENT")) {
       if (configPath) {
         // If a specific path was provided but not found, that's an error
         throw new Error(`Config file not found at: ${configPath}`);

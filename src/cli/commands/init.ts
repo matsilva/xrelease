@@ -1,56 +1,143 @@
-import fs from 'fs/promises';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import inquirer from 'inquirer';
-import ora from 'ora';
-import chalk from 'chalk';
-import { setupGitHooks } from '../../core/hooks.js';
+import fs from "node:fs/promises";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import chalk from "chalk";
+import inquirer from "inquirer";
+import ora from "ora";
+import { setupGitHooks } from "../../core/hooks.js";
 
-import { setupTemplates, TEMPLATES } from '../../core/template.js';
-import type { InitOptions } from '../../types/index.js';
+import { setupTemplates, TEMPLATES } from "../../core/template.js";
+import {
+  type InitOptions,
+  isPackageManager,
+  PACKAGE_MANAGERS,
+  type PackageManager,
+} from "../../types/index.js";
 
+const PACKAGE_MANAGER_COMMANDS: Record<
+  PackageManager,
+  { install: string; build: string; lint: string; test: string }
+> = {
+  npm: {
+    install: "npm install",
+    build: "npm run build",
+    lint: "npm run lint",
+    test: "npm test",
+  },
+  pnpm: {
+    install: "pnpm install",
+    build: "pnpm run build",
+    lint: "pnpm run lint",
+    test: "pnpm run test",
+  },
+  bun: {
+    install: "bun install",
+    build: "bun run build",
+    lint: "bun run lint",
+    test: "bun run test",
+  },
+};
+
+const PACKAGE_MANAGER_REGEX = /packageManager:\s+/u;
+
+function applyPackageManagerToConfig(
+  template: string,
+  packageManager: PackageManager
+): string {
+  const commands = PACKAGE_MANAGER_COMMANDS[packageManager];
+  let content = template;
+
+  if (!PACKAGE_MANAGER_REGEX.test(content)) {
+    content = content.replace(
+      "version: 1\n",
+      `version: 1\npackageManager: ${packageManager}\n`
+    );
+  }
+
+  content = content.replace(/npm install/g, commands.install);
+  content = content.replace(/npm run build/g, commands.build);
+  content = content.replace(/npm run lint/g, commands.lint);
+  content = content.replace(/npm test/g, commands.test);
+
+  return content;
+}
+
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: TODO: Refactor this function into smaller pieces
 export async function initCommand(options: InitOptions): Promise<void> {
   const spinner = ora();
-  const configFile = options.configPath || (process.env.NODE_ENV === 'test' ? '.testxrelease.yml' : '.xrelease.yml');
-  const installationDir = options.installationDir || process.cwd();
+  const configFile =
+    options.configPath ||
+    options.config ||
+    (process.env.NODE_ENV === "test" ? ".testxrelease.yml" : ".xrelease.yml");
+  const installationDir =
+    options.installationDir || options.dir || process.cwd();
+
+  const providedPackageManager = options.packageManager;
+  let packageManager: PackageManager = isPackageManager(providedPackageManager)
+    ? providedPackageManager
+    : "npm";
+  if (providedPackageManager && !isPackageManager(providedPackageManager)) {
+    console.warn(
+      chalk.yellow(
+        `Unknown package manager '${providedPackageManager}'. Falling back to npm.`
+      )
+    );
+  }
+
+  let language = options.language || "node";
+  let components = {
+    workflow: true,
+    changelog: true,
+    hooks: true,
+    language,
+    packageManager,
+  };
 
   try {
-    let components = {
-      workflow: true,
-      changelog: true,
-      hooks: true,
-      language: options.language || 'node',
-    };
-
     if (!options.yes) {
       const answers = await inquirer.prompt([
         {
-          type: 'list',
-          name: 'language',
-          message: 'Select your project language:',
+          type: "list",
+          name: "language",
+          message: "Select your project language:",
           choices: [
-            { name: 'Node.js', value: 'node' },
-            { name: 'Go', value: 'go' },
+            { name: "Node.js", value: "node" },
+            { name: "Go", value: "go" },
           ],
-          default: options.language || 'node',
+          default: options.language || "node",
         },
         {
-          type: 'checkbox',
-          name: 'components',
-          message: 'Select components to initialize:',
+          type: "list",
+          name: "packageManager",
+          message: "Select your package manager:",
+          choices: PACKAGE_MANAGERS.map((pm) => ({ name: pm, value: pm })),
+          default: packageManager,
+        },
+        {
+          type: "checkbox",
+          name: "components",
+          message: "Select components to initialize:",
           choices: [
-            { name: 'GitHub Actions workflow', value: 'workflow', checked: true },
-            { name: 'Changelog generation', value: 'changelog', checked: true },
-            { name: 'Git hooks', value: 'hooks', checked: true },
+            {
+              name: "GitHub Actions workflow",
+              value: "workflow",
+              checked: true,
+            },
+            { name: "Changelog generation", value: "changelog", checked: true },
+            { name: "Git hooks", value: "hooks", checked: true },
           ],
         },
       ]);
 
+      language = answers.language;
+      packageManager = answers.packageManager;
+
       components = {
-        workflow: answers.components.includes('workflow'),
-        changelog: answers.components.includes('changelog'),
-        hooks: answers.components.includes('hooks'),
-        language: answers.language,
+        workflow: answers.components.includes("workflow"),
+        changelog: answers.components.includes("changelog"),
+        hooks: answers.components.includes("hooks"),
+        language,
+        packageManager,
       };
     }
 
@@ -59,19 +146,24 @@ export async function initCommand(options: InitOptions): Promise<void> {
 
     // Setup Git hooks if selected
     if (components.hooks) {
-      spinner.start('Setting up Git hooks...');
-      await setupGitHooks(options.installationDir);
-      spinner.succeed('Git hooks configured successfully');
+      spinner.start("Setting up Git hooks...");
+      await setupGitHooks(installationDir, packageManager);
+      spinner.succeed("Git hooks configured successfully");
     }
 
     // Get template path for .xrelease.yml
     const __dirname = path.dirname(fileURLToPath(import.meta.url));
-    const templatePath = path.join(__dirname, '../../templates', `xrelease.${components.language}.yml`);
+    const templatePath = path.join(
+      __dirname,
+      "../../templates",
+      `xrelease.${components.language}.yml`
+    );
 
     // Create config file
     spinner.start(`Creating ${configFile}...`);
     // Read template
-    const template = await fs.readFile(templatePath, 'utf-8');
+    let template = await fs.readFile(templatePath, "utf-8");
+    template = applyPackageManagerToConfig(template, packageManager);
 
     try {
       await fs.access(configFile);
@@ -83,7 +175,7 @@ export async function initCommand(options: InitOptions): Promise<void> {
     } catch {
       // Create directory if it doesn't exist
       const configDir = path.dirname(configFile);
-      if (configDir !== '.') {
+      if (configDir !== ".") {
         await fs.mkdir(configDir, { recursive: true });
       }
     }
@@ -91,46 +183,59 @@ export async function initCommand(options: InitOptions): Promise<void> {
     await fs.writeFile(configFile, template);
     spinner.succeed(`Created ${configFile}`);
     // Create .gitignore if it doesn't exist
-    spinner.start('Creating .gitignore...');
+    spinner.start("Creating .gitignore...");
     try {
-      await fs.access(path.join(installationDir, '.gitignore'));
-      spinner.succeed('.gitignore already exists');
+      await fs.access(path.join(installationDir, ".gitignore"));
+      spinner.succeed(".gitignore already exists");
       //TODO: add node_modules if it doesnt exist yet
-      const gitignore = await fs.readFile(path.join(installationDir, '.gitignore'), 'utf-8');
-      if (!gitignore.includes('node_modules/')) {
-        await fs.appendFile(path.join(installationDir, '.gitignore'), 'node_modules/\n');
+      const gitignore = await fs.readFile(
+        path.join(installationDir, ".gitignore"),
+        "utf-8"
+      );
+      if (!gitignore.includes("node_modules/")) {
+        await fs.appendFile(
+          path.join(installationDir, ".gitignore"),
+          "node_modules/\n"
+        );
       }
     } catch {
-      await fs.writeFile(path.join(installationDir, '.gitignore'), 'node_modules/\n.DS_Store\n');
-      spinner.succeed('Created .gitignore');
+      await fs.writeFile(
+        path.join(installationDir, ".gitignore"),
+        "node_modules/\n.DS_Store\n"
+      );
+      spinner.succeed("Created .gitignore");
     }
 
-    console.log('\n✨ xrelease initialized successfully!');
-    console.log('\nNext steps:');
-    console.log('  1. Review the generated configuration files');
-    console.log(`  2. Run ${chalk.cyan('git commit')} to test the commit hooks`);
-    console.log('  3. Create a new tag to test the release workflow');
+    console.log("\n✨ xrelease initialized successfully!");
+    console.log("\nNext steps:");
+    console.log("  1. Review the generated configuration files");
+    console.log(
+      `  2. Run ${chalk.cyan("git commit")} to test the commit hooks`
+    );
+    console.log("  3. Create a new tag to test the release workflow");
 
     // Add language-specific instructions
-    if (components.language === 'go') {
-      console.log('\nGo-specific setup:');
-      console.log('  1. Ensure your go.mod file is initialized');
-      console.log('  2. Install golangci-lint for code quality checks');
-      console.log('  3. The workflow will use package.json for version management');
+    if (components.language === "go") {
+      console.log("\nGo-specific setup:");
+      console.log("  1. Ensure your go.mod file is initialized");
+      console.log("  2. Install golangci-lint for code quality checks");
+      console.log(
+        "  3. The workflow will use package.json for version management"
+      );
     }
   } catch (error) {
-    spinner.fail('Initialization failed');
+    spinner.fail("Initialization failed");
 
     if (error instanceof Error) {
       console.error(`\nError: ${error.message}`);
-    } else if (typeof error === 'string') {
-      console.error('\nError: Unknown error occurred');
+    } else if (typeof error === "string") {
+      console.error("\nError: Unknown error occurred");
     } else {
-      console.error('\nError: Unknown error occurred');
+      console.error("\nError: Unknown error occurred");
     }
 
     // Only exit in non-test environment
-    if (process.env.NODE_ENV !== 'test') {
+    if (process.env.NODE_ENV !== "test") {
       process.exit(1);
     }
 

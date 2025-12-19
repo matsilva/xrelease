@@ -9,7 +9,7 @@ release:
   # Version file updates
   version:
     files:
-      - path: 'package.json'
+      - path: "package.json"
         pattern: "\"version\":\\s*\"(?<version>[^\"]+)\""
         template: '"version": "${version}"'
 
@@ -21,16 +21,16 @@ release:
   # Pre-release steps
   pre:
     - type: install
-      command: 'npm install'
+      command: "npm install"
     - type: build
-      command: 'npm run build'
+      command: "npm run build"
 
   # Pre-release checks
   checks:
     - type: lint
-      command: 'npm run lint'
+      command: "npm run lint"
     - type: test
-      command: 'npm test'
+      command: "npm test"
 
   # Release actions actions
   actions:
