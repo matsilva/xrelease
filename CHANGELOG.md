@@ -2,103 +2,103 @@
 
 ## [0.4.0] - 2025-04-04
 
-* feat: add pre and post release steps to the create command (#2)
-* chore: release v0.3.5
+- feat: add pre and post release steps to the create command (#2)
+- chore: release v0.3.5
 
 ## [0.3.5] - 2025-04-04
 
-* chore: rewrite readme
-* chore: remove ds store
-* chore: release v0.3.4
+- chore: rewrite readme
+- chore: remove ds store
+- chore: release v0.3.4
 
 ## [0.3.4] - 2025-03-12
 
-* chore: add npm install to node template
-* chore: update author
-* refactor: remove husky prepare script modification
-* fix: install husky as dev dep
-* chore: add `-y` flag to xrelease command in release workflows
-* chore: update release configuration template
-* chore: add prepublish cmd
-* chore: release v0.3.3
+- chore: add npm install to node template
+- chore: update author
+- refactor: remove husky prepare script modification
+- fix: install husky as dev dep
+- chore: add `-y` flag to xrelease command in release workflows
+- chore: update release configuration template
+- chore: add prepublish cmd
+- chore: release v0.3.3
 
 ## [0.3.3] - 2025-03-09
 
-* chore: add test for mod path without version
-* fix: update version file
-* chore: update publish cmd
-* chore: release v0.3.2
+- chore: add test for mod path without version
+- fix: update version file
+- chore: update publish cmd
+- chore: release v0.3.2
 
 ## [0.3.2] - 2025-03-09
 
-* chore: remove automated patch release
-* chore: add automated patch releases
-* chore: release v0.3.1
+- chore: remove automated patch release
+- chore: add automated patch releases
+- chore: release v0.3.1
 
 ## [0.3.1] - 2025-03-09
 
-* fix:  upload artifacts
-* chore: add asset publishing examples
-* fix: add default esm module
-* chore: add comments on go template version
-* fix: go mod version
-* fix: use go mod version if its available for package version
-* fix: add node_modules to gitignore
-* chore: release v0.3.0
+- fix: upload artifacts
+- chore: add asset publishing examples
+- fix: add default esm module
+- chore: add comments on go template version
+- fix: go mod version
+- fix: use go mod version if its available for package version
+- fix: add node_modules to gitignore
+- chore: release v0.3.0
 
 ## [0.3.0] - 2025-03-09
 
-* feat: add support for custom installation directory
-* chore: package json creation order
-* chore: release v0.2.4
+- feat: add support for custom installation directory
+- chore: package json creation order
+- chore: release v0.2.4
 
 ## [0.2.4] - 2025-03-09
 
-* refactor: improve template setup status updates
-* docs: update cli tldr with brief descriptions
-* chore: release v0.2.3
+- refactor: improve template setup status updates
+- docs: update cli tldr with brief descriptions
+- chore: release v0.2.3
 
 ## [0.2.3] - 2025-03-09
 
-* fix: copy templates to dist
-* chore: release v0.2.2
+- fix: copy templates to dist
+- chore: release v0.2.2
 
 ## [0.2.2] - 2025-03-09
 
-* chore: fix pkg version
-* chore: add publish cmd
-* chore: release v0.2.1
+- chore: fix pkg version
+- chore: add publish cmd
+- chore: release v0.2.1
 
 ## [0.2.1] - 2025-03-09
 
-* chore: update usage docs again
-* chore: fix package json git
-* chore: release v0.2.0
+- chore: update usage docs again
+- chore: fix package json git
+- chore: release v0.2.0
 
 ## [0.2.0] - 2025-03-09
 
-* chore: remove cruft
-* chore: remove dup
-* chore: update readme
-* docs: update usage
-* refactor: simplify release command and changelog template handling
-* refactor: simplify release command and remove --ci flag
-* refactor: template files
-* docs:  add legal and more blurbs
-* chore: remove unused type
-* fix: update GitHub Actions release workflows
-* chore: release v0.1.5
+- chore: remove cruft
+- chore: remove dup
+- chore: update readme
+- docs: update usage
+- refactor: simplify release command and changelog template handling
+- refactor: simplify release command and remove --ci flag
+- refactor: template files
+- docs: add legal and more blurbs
+- chore: remove unused type
+- fix: update GitHub Actions release workflows
+- chore: release v0.1.5
 
 ## [0.1.5] - 2025-03-08
 
-* chore: add npm install
-* chore: update GitHub Actions workflow with build and dependency steps
-* chore: release v0.1.4
+- chore: add npm install
+- chore: update GitHub Actions workflow with build and dependency steps
+- chore: release v0.1.4
 
 ## [0.1.4] - 2025-03-08
 
-* feat: add commit-push action to release workflow
-* feat: add commit and tag actions for release workflow
+- feat: add commit-push action to release workflow
+- feat: add commit and tag actions for release workflow
 
 ## [0.1.3] - 2025-03-08
 

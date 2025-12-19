@@ -1,11 +1,18 @@
-import { execa } from 'execa';
-import { readConfig } from '../config.js';
-import minimatch from 'minimatch';
+import { execa } from "execa";
+import minimatch from "minimatch";
+import { readConfig } from "../config.js";
 
-export async function checkBranch(overrideBranch?: string, configPath?: string): Promise<void> {
+export async function checkBranch(
+  overrideBranch?: string,
+  configPath?: string
+): Promise<void> {
   try {
     // Get current branch
-    const { stdout: currentBranch } = await execa('git', ['rev-parse', '--abbrev-ref', 'HEAD']);
+    const { stdout: currentBranch } = await execa("git", [
+      "rev-parse",
+      "--abbrev-ref",
+      "HEAD",
+    ]);
 
     // Get allowed branches from config
     const config = await readConfig(configPath);
@@ -13,7 +20,9 @@ export async function checkBranch(overrideBranch?: string, configPath?: string):
 
     // Check if current branch matches any of the allowed patterns
     const isAllowed = allowedBranches.some((pattern) =>
-      pattern.includes('*') ? minimatch(currentBranch, pattern) : currentBranch === pattern
+      pattern.includes("*")
+        ? minimatch(currentBranch, pattern)
+        : currentBranch === pattern
     );
 
     if (!isAllowed) {
@@ -25,11 +34,14 @@ export async function checkBranch(overrideBranch?: string, configPath?: string):
     if (error instanceof Error) {
       throw error;
     }
-    throw new Error('Failed to check git branch');
+    throw new Error("Failed to check git branch");
   }
 }
 
-function getAllowedBranches(config: { release: { branch?: string; branches?: string[] } }, overrideBranch?: string): string[] {
+function getAllowedBranches(
+  config: { release: { branch?: string; branches?: string[] } },
+  overrideBranch?: string
+): string[] {
   if (overrideBranch) {
     return [overrideBranch];
   }
@@ -39,5 +51,5 @@ function getAllowedBranches(config: { release: { branch?: string; branches?: str
     return config.release.branches;
   }
 
-  return [config.release.branch || 'main'];
+  return [config.release.branch || "main"];
 }

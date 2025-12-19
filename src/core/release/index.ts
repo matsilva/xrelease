@@ -1,3 +1,2 @@
-export namespace Release {
-  //TODO refactor this
-}
+// TODO refactor this - placeholder for future release exports
+export {};

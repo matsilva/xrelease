@@ -1,13 +1,12 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import fs from "node:fs/promises";
+import path from "node:path";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
-  setupTemplates,
-  updateVersionInFile,
   applyPackageManagerToWorkflow,
+  setupTemplates,
+  TEMPLATES,
+  updateVersionInFile,
 } from "./template.js";
-import fs from "fs/promises";
-import path from "path";
-import { fileURLToPath } from "url";
-import { TEMPLATES } from "./template.js";
 
 const TEST_DIR = "test-output/template-tests";
 
@@ -28,11 +27,11 @@ describe("setupTemplates", () => {
     await setupTemplates(
       { workflow: true, changelog: false, hooks: false },
       TEMPLATES,
-      TEST_DIR,
+      TEST_DIR
     );
 
     const pkgJson = JSON.parse(
-      await fs.readFile(path.join(TEST_DIR, "package.json"), "utf-8"),
+      await fs.readFile(path.join(TEST_DIR, "package.json"), "utf-8")
     );
     expect(pkgJson).toEqual({
       name: path.basename(TEST_DIR),
@@ -58,18 +57,18 @@ describe("setupTemplates", () => {
     };
     await fs.writeFile(
       path.join(TEST_DIR, "package.json"),
-      JSON.stringify(existingPkg, null, 2),
+      JSON.stringify(existingPkg, null, 2)
     );
 
     await setupTemplates(
       { workflow: true, changelog: false, hooks: false },
       TEMPLATES,
-      TEST_DIR,
+      TEST_DIR
     );
 
     // Verify package.json wasn't modified
     const pkgJson = JSON.parse(
-      await fs.readFile(path.join(TEST_DIR, "package.json"), "utf-8"),
+      await fs.readFile(path.join(TEST_DIR, "package.json"), "utf-8")
     );
     expect(pkgJson).toEqual(existingPkg);
   });
@@ -78,7 +77,7 @@ describe("setupTemplates", () => {
     await setupTemplates(
       { workflow: true, changelog: false, hooks: false },
       TEMPLATES,
-      TEST_DIR,
+      TEST_DIR
     );
 
     // Verify workflow file exists and has content
@@ -91,13 +90,13 @@ describe("setupTemplates", () => {
     await setupTemplates(
       { workflow: false, changelog: true, hooks: false },
       TEMPLATES,
-      TEST_DIR,
+      TEST_DIR
     );
 
     // Verify versionrc exists and has content
     const content = await fs.readFile(
       path.join(TEST_DIR, ".versionrc"),
-      "utf-8",
+      "utf-8"
     );
     expect(content).toBeTruthy();
   });
@@ -106,7 +105,7 @@ describe("setupTemplates", () => {
     await setupTemplates(
       { workflow: true, changelog: true, hooks: false },
       TEMPLATES,
-      TEST_DIR,
+      TEST_DIR
     );
 
     // Verify both files exist
@@ -123,7 +122,7 @@ describe("setupTemplates", () => {
     await setupTemplates(
       { workflow: true, changelog: true, hooks: false, language: "go" },
       TEMPLATES,
-      TEST_DIR,
+      TEST_DIR
     );
 
     // Verify Go-specific workflow file exists and has Go-specific content
@@ -141,8 +140,8 @@ describe("setupTemplates", () => {
       setupTemplates(
         { workflow: true, changelog: false, hooks: false },
         TEMPLATES,
-        TEST_DIR,
-      ),
+        TEST_DIR
+      )
     ).rejects.toThrow();
   });
 
@@ -150,15 +149,15 @@ describe("setupTemplates", () => {
     await setupTemplates(
       { workflow: true, changelog: true, hooks: false },
       TEMPLATES,
-      TEST_DIR,
+      TEST_DIR
     );
 
     // Verify directories exist
     await expect(
-      fs.access(path.join(TEST_DIR, ".github")),
+      fs.access(path.join(TEST_DIR, ".github"))
     ).resolves.toBeUndefined();
     await expect(
-      fs.access(path.join(TEST_DIR, ".github/workflows")),
+      fs.access(path.join(TEST_DIR, ".github/workflows"))
     ).resolves.toBeUndefined();
   });
 
@@ -166,7 +165,7 @@ describe("setupTemplates", () => {
     await setupTemplates(
       { workflow: true, changelog: true, hooks: false },
       TEMPLATES,
-      TEST_DIR,
+      TEST_DIR
     );
   });
 
@@ -186,10 +185,10 @@ require (
     await setupTemplates(
       { workflow: true, changelog: false, hooks: false, language: "go" },
       TEMPLATES,
-      TEST_DIR,
+      TEST_DIR
     );
     let pkgJson = JSON.parse(
-      await fs.readFile(path.join(TEST_DIR, "package.json"), "utf-8"),
+      await fs.readFile(path.join(TEST_DIR, "package.json"), "utf-8")
     );
     expect(pkgJson).toEqual({
       name: "AudeticLinkInstaller",
@@ -206,10 +205,10 @@ require (
     await setupTemplates(
       { workflow: true, changelog: false, hooks: false, language: "node" },
       TEMPLATES,
-      TEST_DIR,
+      TEST_DIR
     );
     pkgJson = JSON.parse(
-      await fs.readFile(path.join(TEST_DIR, "package.json"), "utf-8"),
+      await fs.readFile(path.join(TEST_DIR, "package.json"), "utf-8")
     );
     expect(pkgJson).toEqual({
       name: path.basename(TEST_DIR),
@@ -239,19 +238,19 @@ require (
     await setupTemplates(
       { workflow: true, changelog: false, hooks: false, language: "go" },
       TEMPLATES,
-      TEST_DIR,
+      TEST_DIR
     );
 
     // Verify package.json uses just the project name
     const pkgJson = JSON.parse(
-      await fs.readFile(path.join(TEST_DIR, "package.json"), "utf-8"),
+      await fs.readFile(path.join(TEST_DIR, "package.json"), "utf-8")
     );
     expect(pkgJson.name).toBe("AudeticLinkInstaller");
 
     // Verify go.mod still has the full module path
     const updatedGoMod = await fs.readFile(
       path.join(TEST_DIR, "go.mod"),
-      "utf-8",
+      "utf-8"
     );
     expect(updatedGoMod).toContain(`module ${modulePath}`);
   });
@@ -281,6 +280,7 @@ describe("updateVersionInFile", () => {
     await updateVersionInFile({
       path: pkgPath,
       pattern: '"version":\\s*"([^"]+)"',
+      // biome-ignore lint/suspicious/noTemplateCurlyInString: Template pattern for version replacement
       template: '"version": "${version}"',
       version: "2.0.0",
     });
@@ -321,6 +321,7 @@ require (
       await updateVersionInFile({
         path: goModPath,
         pattern: "^module\\s+([^\\s]+)",
+        // biome-ignore lint/suspicious/noTemplateCurlyInString: Template pattern for capture group
         template: "module ${1}",
         version: "2.0.0", // This version should not affect the output
       });
@@ -328,6 +329,7 @@ require (
       // Verify module path is preserved exactly as it was
       const updated = await fs.readFile(goModPath, "utf-8");
       expect(updated).toContain(tc.expected);
+      // biome-ignore lint/suspicious/noTemplateCurlyInString: Verifying template placeholder was replaced
       expect(updated).not.toContain("${1}"); // Make sure template placeholder is replaced
     }
   });
@@ -341,6 +343,7 @@ require (
     await updateVersionInFile({
       path: testPath,
       pattern: "prefix-([^-]+)-([^-]+)-suffix",
+      // biome-ignore lint/suspicious/noTemplateCurlyInString: Template pattern with multiple placeholders
       template: "prefix-${1}-${version}-${2}-suffix",
       version: "2.0.0",
     });
@@ -357,9 +360,10 @@ require (
       updateVersionInFile({
         path: nonExistentPath,
         pattern: "version:\\s*(.*)",
+        // biome-ignore lint/suspicious/noTemplateCurlyInString: Template pattern for version replacement
         template: "version: ${version}",
         version: "1.0.0",
-      }),
+      })
     ).rejects.toThrow();
   });
 });
@@ -420,7 +424,7 @@ describe("setupTemplates with package manager", () => {
     await setupTemplates(
       { workflow: true, changelog: false, hooks: false, packageManager: "bun" },
       TEMPLATES,
-      TEST_DIR,
+      TEST_DIR
     );
 
     const workflowPath = path.join(TEST_DIR, ".github/workflows/release.yml");
@@ -439,7 +443,7 @@ describe("setupTemplates with package manager", () => {
         packageManager: "pnpm",
       },
       TEMPLATES,
-      TEST_DIR,
+      TEST_DIR
     );
 
     const workflowPath = path.join(TEST_DIR, ".github/workflows/release.yml");

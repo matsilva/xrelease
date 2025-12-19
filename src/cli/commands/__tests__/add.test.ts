@@ -1,9 +1,9 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import path from "path";
-import { addCommand } from "../add.js";
+import path from "node:path";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { readConfig } from "../../../core/config.js";
 import { setupGitHooks } from "../../../core/hooks.js";
 import { setupTemplates, TEMPLATES } from "../../../core/template.js";
-import { readConfig } from "../../../core/config.js";
+import { addCommand } from "../add.js";
 
 // Mock dependencies
 vi.mock("chalk", async () => {
@@ -43,7 +43,7 @@ describe("addCommand", () => {
         hooks: false,
       },
       TEMPLATES,
-      TEST_DIR,
+      TEST_DIR
     );
   });
 
@@ -57,7 +57,7 @@ describe("addCommand", () => {
         hooks: false,
       },
       TEMPLATES,
-      TEST_DIR,
+      TEST_DIR
     );
   });
 
@@ -65,7 +65,7 @@ describe("addCommand", () => {
     await addCommand("hooks", TEST_DIR);
 
     expect(readConfig).toHaveBeenCalledWith(
-      path.join(TEST_DIR, ".xrelease.yml"),
+      path.join(TEST_DIR, ".xrelease.yml")
     );
     expect(setupGitHooks).toHaveBeenCalledWith(TEST_DIR, "npm");
   });
@@ -95,7 +95,9 @@ describe("addCommand", () => {
   });
 
   it("should show error for invalid component", async () => {
-    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {
+      /* Intentionally empty - suppressing console output in tests */
+    });
     const processSpy = vi
       .spyOn(process, "exit")
       .mockImplementation(() => undefined as never);
@@ -109,7 +111,9 @@ describe("addCommand", () => {
   it("should handle errors when adding workflow", async () => {
     const error = new Error("Failed to add workflow");
     vi.mocked(setupTemplates).mockRejectedValue(error);
-    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {
+      /* Intentionally empty - suppressing console output in tests */
+    });
     const processSpy = vi
       .spyOn(process, "exit")
       .mockImplementation(() => undefined as never);
@@ -123,7 +127,9 @@ describe("addCommand", () => {
   it("should handle errors when adding hooks", async () => {
     const error = new Error("Failed to add hooks");
     vi.mocked(setupGitHooks).mockRejectedValue(error);
-    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {
+      /* Intentionally empty - suppressing console output in tests */
+    });
     const processSpy = vi
       .spyOn(process, "exit")
       .mockImplementation(() => undefined as never);
@@ -136,7 +142,9 @@ describe("addCommand", () => {
 
   it("should handle non-Error objects in error handling", async () => {
     vi.mocked(setupTemplates).mockRejectedValue("String error");
-    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {
+      /* Intentionally empty - suppressing console output in tests */
+    });
     const processSpy = vi
       .spyOn(process, "exit")
       .mockImplementation(() => undefined as never);

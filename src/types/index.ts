@@ -1,7 +1,9 @@
-export type PackageManager = 'npm' | 'pnpm' | 'bun';
-export const PACKAGE_MANAGERS: PackageManager[] = ['npm', 'pnpm', 'bun'];
+export type PackageManager = "npm" | "pnpm" | "bun";
+export const PACKAGE_MANAGERS: PackageManager[] = ["npm", "pnpm", "bun"];
 export function isPackageManager(value: unknown): value is PackageManager {
-  return typeof value === 'string' && (PACKAGE_MANAGERS as string[]).includes(value);
+  return (
+    typeof value === "string" && (PACKAGE_MANAGERS as string[]).includes(value)
+  );
 }
 
 // CLI Options
@@ -41,26 +43,26 @@ export interface TemplateConfig {
 export class ToolkitError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = 'ToolkitError';
+    this.name = "ToolkitError";
   }
 }
 
 export class ValidationError extends ToolkitError {
   constructor(message: string) {
     super(message);
-    this.name = 'ValidationError';
+    this.name = "ValidationError";
   }
 }
 
 export class ConfigurationError extends ToolkitError {
   constructor(message: string) {
     super(message);
-    this.name = 'ConfigurationError';
+    this.name = "ConfigurationError";
   }
 }
 
 export interface AddOptions {
-  component: 'workflow' | 'changelog' | 'hooks';
+  component: "workflow" | "changelog" | "hooks";
 }
 
 export interface TemplateOptions {

@@ -1,12 +1,12 @@
-import fs from "fs/promises";
-import path from "path";
-import { fileURLToPath } from "url";
+import fs from "node:fs/promises";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import ora from "ora";
 import type {
   ComponentConfig,
-  TemplateConfig,
   PackageManager,
+  TemplateConfig,
 } from "../types/index.js";
-import ora from "ora";
 
 /**
  * Package manager command mappings for workflow templates
@@ -47,12 +47,15 @@ const PACKAGE_MANAGER_WORKFLOW_COMMANDS: Record<
   },
 };
 
+const NODE_SETUP_PATTERN =
+  /- name: Setup Node\.js\n\s+uses: actions\/setup-node@v4\n\s+with:\n\s+node-version: '22'\n\s+# node-version-file:.*\n\s+registry-url:.*$/m;
+
 /**
  * Applies package manager specific commands to workflow template content
  */
 export function applyPackageManagerToWorkflow(
   content: string,
-  packageManager: PackageManager,
+  packageManager: PackageManager
 ): string {
   const commands = PACKAGE_MANAGER_WORKFLOW_COMMANDS[packageManager];
 
@@ -60,17 +63,17 @@ export function applyPackageManagerToWorkflow(
   let result = content.replace(/npx -y/g, commands.npx);
 
   // Replace setup step (match the Node.js setup block)
-  const nodeSetupPattern =
-    /- name: Setup Node\.js\n\s+uses: actions\/setup-node@v4\n\s+with:\n\s+node-version: '22'\n\s+# node-version-file:.*\n\s+registry-url:.*$/m;
-  result = result.replace(nodeSetupPattern, commands.setup);
+  result = result.replace(NODE_SETUP_PATTERN, commands.setup);
 
   return result;
 }
 
 export const TEMPLATE_DIR = path.join(
   path.dirname(fileURLToPath(import.meta.url)),
-  "../templates",
+  "../templates"
 );
+
+const GO_MODULE_PATTERN = /^module\s+([^\s]+)/m;
 
 export const TEMPLATES: Record<string, Record<string, TemplateConfig[]>> = {
   workflow: {
@@ -106,7 +109,7 @@ export const TEMPLATES: Record<string, Record<string, TemplateConfig[]>> = {
 export async function setupTemplates(
   components: ComponentConfig,
   templates: typeof TEMPLATES,
-  destDir = process.cwd(),
+  destDir = process.cwd()
 ): Promise<void> {
   const spinner = ora();
   spinner.start("Setting up project templates...");
@@ -120,7 +123,7 @@ export async function setupTemplates(
       spinner.succeed("package.json already exists");
     } else {
       spinner.succeed(
-        "Created package.json with default version: 0.1.0. Adjust as needed.",
+        "Created package.json with default version: 0.1.0. Adjust as needed."
       );
     }
     // Process workflow templates
@@ -147,16 +150,16 @@ export async function setupTemplates(
     }
     spinner.succeed("Templates configured successfully");
   } catch (error) {
-    spinner.fail(`Failed to setup templates`);
+    spinner.fail("Failed to setup templates");
     throw new Error(
-      `Failed to setup templates: ${error instanceof Error ? error.message : "Unknown error"}`,
+      `Failed to setup templates: ${error instanceof Error ? error.message : "Unknown error"}`
     );
   }
 }
 
 export async function setupPackageJson(
   dir = process.cwd(),
-  language = "node",
+  language = "node"
 ): Promise<string> {
   try {
     await fs.access(path.join(dir, "package.json"));
@@ -171,9 +174,9 @@ export async function setupPackageJson(
       try {
         const goModContent = await fs.readFile(
           path.join(dir, "go.mod"),
-          "utf-8",
+          "utf-8"
         );
-        const moduleMatch = goModContent.match(/^module\s+([^\s]+)/m);
+        const moduleMatch = goModContent.match(GO_MODULE_PATTERN);
         if (moduleMatch) {
           // Extract just the last part of the module path
           packageName = moduleMatch[1].split("/").pop() || packageName;
@@ -196,8 +199,8 @@ export async function setupPackageJson(
           private: true,
         },
         null,
-        2,
-      ),
+        2
+      )
     );
     return "created";
   }
@@ -205,7 +208,7 @@ export async function setupPackageJson(
 
 export async function processTemplates(
   templates: TemplateConfig[],
-  baseDestDir = process.cwd(),
+  baseDestDir = process.cwd()
 ): Promise<void> {
   for (const template of templates) {
     const sourcePath = path.join(TEMPLATE_DIR, template.source);

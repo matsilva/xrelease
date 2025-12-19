@@ -1,9 +1,10 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { initCommand } from "../init.js";
-import { setupTemplates, TEMPLATES } from "../../../core/template.js";
-import { setupGitHooks } from "../../../core/hooks.js";
+import fs from "node:fs/promises";
 import inquirer from "inquirer";
-import fs from "fs/promises";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { setupGitHooks } from "../../../core/hooks.js";
+import { setupTemplates, TEMPLATES } from "../../../core/template.js";
+import { initCommand } from "../init.js";
+
 // Mock dependencies
 vi.mock("../../../core/template.js");
 vi.mock("../../../core/hooks.js");
@@ -33,7 +34,7 @@ describe("initCommand", () => {
         packageManager: "npm",
       },
       TEMPLATES,
-      TEST_DIR,
+      TEST_DIR
     );
 
     // Verify setupGitHooks was called with correct directory
@@ -59,7 +60,7 @@ describe("initCommand", () => {
         packageManager: "pnpm",
       },
       TEMPLATES,
-      TEST_DIR,
+      TEST_DIR
     );
 
     // Verify setupGitHooks was not called since hooks weren't selected
@@ -78,7 +79,7 @@ describe("initCommand", () => {
         packageManager: "npm",
       },
       TEMPLATES,
-      TEST_DIR,
+      TEST_DIR
     );
   });
 
@@ -98,7 +99,7 @@ describe("initCommand", () => {
         packageManager: "bun",
       },
       TEMPLATES,
-      TEST_DIR,
+      TEST_DIR
     );
 
     expect(setupGitHooks).toHaveBeenCalledWith(TEST_DIR, "bun");
@@ -122,7 +123,7 @@ describe("initCommand", () => {
         packageManager: "bun",
       },
       TEMPLATES,
-      TEST_DIR,
+      TEST_DIR
     );
 
     expect(setupGitHooks).toHaveBeenCalledWith(TEST_DIR, "bun");
